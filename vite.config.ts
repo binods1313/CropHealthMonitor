@@ -11,9 +11,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     define: {
-      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY), // Map VITE_GEMINI_API_KEY to process.env.API_KEY for compatibility
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
-      'process.env.VITE_GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
       'process.env.VITE_NASA_API_KEY': JSON.stringify(env.VITE_NASA_API_KEY),
       'process.env.VITE_OPENWEATHER_API_KEY': JSON.stringify(env.VITE_OPENWEATHER_API_KEY)
     },
