@@ -1,0 +1,62 @@
+{
+  "healthScore": 78,
+  "confidence": 85,
+  "primaryDiagnosis": "Nitrogen Deficiency",
+  "affectedArea": "25% of field",
+  "detailedExplanation": "NDVI analysis indicates moderate nitrogen deficiency in the western quadrant of the field. This is likely due to uneven fertilizer application and recent heavy rainfall that may have caused nitrogen leaching in that area.",
+  "interventions": [
+    {
+      "title": "Foliar Nitrogen Application",
+      "goal": "Address immediate deficiency",
+      "impact": "High",
+      "confidence": 90,
+      "materials": ["Urea fertilizer", "Spray equipment"]
+    },
+    {
+      "title": "Soil Testing",
+      "goal": "Confirm nutrient levels",
+      "impact": "Medium",
+      "confidence": 80,
+      "materials": ["Soil testing kit"]
+    }
+  ],
+  "monitoringPlan": "Monitor NDVI changes weekly for 3 weeks post-treatment",
+  "overall_health_score": 78,
+  "primary_stress": "Nitrogen Deficiency",
+  "explanation": "NDVI analysis indicates moderate nitrogen deficiency in the western quadrant of the field.",
+  "monitoring_plan": "Monitor NDVI changes weekly for 3 weeks post-treatment",
+  "ndviMetrics": {
+    "min": 0.2,
+    "max": 0.85,
+    "avg": 0.62
+  },
+  "soilMetrics": {
+    "pH": 6.8,
+    "nitrogen": 45,
+    "phosphorus": 28,
+    "potassium": 156,
+    "moisture": 28,
+    "organicMatter": 4.2
+  },
+  "weatherMetrics": {
+    "temperature": 22.5,
+    "humidity": 68,
+    "windSpeed": 3.2,
+    "precipitation": 12.4
+  },
+  "timeToAction": "7 days",
+  "yieldRisk": "Moderate",
+  "confidenceScore": 85,
+  "reportId": "HLD-2023-001",
+  "farmName": "Sample Farm",
+  "location": {
+    "name": "Sample Location"
+  },
+  "scanDate": "2023-11-15",
+  "cropType": "Wheat",
+  "areaHa": 45.6,
+  "images": {
+    "ndviMap": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    "deficiencyOverlay": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+  }
+}

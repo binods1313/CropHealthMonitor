@@ -1,0 +1,5 @@
+{
+  "name": "CropHealth Monitor",
+  "description": "An AI-powered agronomy dashboard using Gemini 3 Pro to analyze satellite imagery and sensor data for sustainable farming interventions.",
+  "requestFramePermissions": []
+}

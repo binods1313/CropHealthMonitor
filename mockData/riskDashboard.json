@@ -1,0 +1,142 @@
+{
+  "metadata": {
+    "eventId": "RISK-2023-001",
+    "disasterType": "Drought",
+    "severity": 7,
+    "detectionTime": "2023-11-15T10:30:00Z",
+    "location": {
+      "region": "Central Valley",
+      "country": "USA",
+      "coordinates": {
+        "lat": 36.7783,
+        "lon": -119.4179
+      },
+      "affectedAreaSqKm": 250
+    },
+    "satelliteImagery": {
+      "provider": "Sentinel-2 Fallback",
+      "date": "2023-11-15T10:00:00Z",
+      "resolution": "10m"
+    }
+  },
+  "riskAssessment": {
+    "immediateRisk": {
+      "severity": 7,
+      "description": "Prolonged drought conditions affecting 250 sq km agricultural area. Severe water stress indicators detected via NDVI analysis.",
+      "timeToImpact": "2-4 Weeks",
+      "populationAtRisk": 850
+    },
+    "trajectoryPrediction": {
+      "predictedPath": "Drought conditions expected to persist with no significant precipitation forecast for next 30 days.",
+      "windInfluence": "N/A",
+      "spreadRate": "Slow expansion due to seasonal patterns",
+      "confidence": 0.85
+    },
+    "environmentalFactors": {
+      "temperature": 32,
+      "humidity": 15,
+      "windSpeed": 3.5,
+      "windDirection": "North (0°)",
+      "precipitation": 0
+    }
+  },
+  "interventionStrategy": {
+    "immediateActions": [
+      {
+        "priority": 1,
+        "action": "Implement water conservation measures",
+        "goal": "Preserve existing water resources",
+        "impact": "Critical",
+        "timing": "Within 1 week",
+        "responsibleAgency": "Regional Water Authority",
+        "resources": ["Water monitoring equipment"],
+        "costLevel": "Medium",
+        "expectedOutcome": "Reduced water consumption by 20%"
+      },
+      {
+        "priority": 2,
+        "action": "Deploy drought-resistant crop varieties",
+        "goal": "Maintain yield during dry conditions",
+        "impact": "High",
+        "timing": "Within 2 weeks",
+        "responsibleAgency": "Agricultural Extension Service",
+        "resources": ["Seed distribution"],
+        "costLevel": "High",
+        "expectedOutcome": "Improved crop survival rates"
+      }
+    ],
+    "evacuationPlan": {
+      "zones": [
+        {
+          "zoneId": "ZA-1",
+          "name": "Zone Alpha",
+          "population": 350,
+          "evacuationRoute": "Highway 99 North",
+          "timeToEvacuate": "2-4 Hours"
+        }
+      ],
+      "shelterLocations": [
+        "Central Valley Community Center",
+        "Greenfield Elementary School"
+      ]
+    },
+    "resourceAllocation": {
+      "firefighting": "N/A - Drought specific",
+      "medical": "Emergency Response Ready",
+      "emergency": "EOC Level 1"
+    }
+  },
+  "monitoringPlan": {
+    "timelinePhases": [
+      {
+        "phase": "Initial Response",
+        "actions": ["Deploy monitoring stations", "Issue alerts"],
+        "checkpoints": ["Resource staging"]
+      },
+      {
+        "phase": "Sustained Response",
+        "actions": ["Water distribution", "Crop assessment"],
+        "checkpoints": ["Resource availability"]
+      }
+    ],
+    "liveMonitoringPoints": [
+      {
+        "location": "NW Quadrant",
+        "parameter": "Soil moisture",
+        "status": "Critical",
+        "lastUpdated": "2023-11-15T08:00:00Z"
+      }
+    ]
+  },
+  "communicationStrategy": {
+    "publicAlerts": {
+      "channels": ["Emergency Broadcast System", "SMS", "Local Radio"],
+      "messageFrequency": "Daily",
+      "keyMessages": [
+        "Water conservation mandatory",
+        "Limit outdoor water use",
+        "Prepare for potential water restrictions"
+      ]
+    },
+    "officialUpdates": {
+      "authority": "Regional Command",
+      "updateFrequency": "Continuous"
+    }
+  },
+  "historicalContext": {
+    "previousSimilarEvents": [
+      {
+        "event": "2012-2014 California Drought",
+        "year": "2012-2014",
+        "impact": "Agricultural losses exceeded $3.8 billion"
+      }
+    ],
+    "regionalRiskProfile": "High drought risk due to low precipitation and high temperatures during growing season."
+  },
+  "meta": {
+    "overallConfidenceScore": 0.85,
+    "disclaimer": "SIMULATION: Handshake failure recovery mode active.",
+    "generatedAt": "2023-11-15T10:30:00Z",
+    "reportVersion": "L5-RECOVERY"
+  }
+}

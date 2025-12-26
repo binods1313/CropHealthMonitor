@@ -1,0 +1,81 @@
+{
+  "currentWeather": {
+    "temp": 24,
+    "humidity": 72,
+    "precip": 0.5,
+    "windSpeed": 4.2,
+    "windDirection": 180,
+    "cloudCover": 45,
+    "soilMoisture": 35,
+    "windChill": 24
+  },
+  "forecast": [
+    {
+      "day": "Mon",
+      "temp": 26,
+      "condition": "Clouds",
+      "precip": 0.2
+    },
+    {
+      "day": "Tue",
+      "temp": 28,
+      "condition": "Clear",
+      "precip": 0
+    },
+    {
+      "day": "Wed",
+      "temp": 25,
+      "condition": "Rain",
+      "precip": 5.8
+    }
+  ],
+  "historicalTrend": [
+    {
+      "date": "2023-11-01",
+      "temp": 22,
+      "precip": 2.1
+    },
+    {
+      "date": "2023-11-08",
+      "temp": 23,
+      "precip": 0.8
+    },
+    {
+      "date": "2023-11-15",
+      "temp": 24,
+      "precip": 0.5
+    }
+  ],
+  "climateRisk": {
+    "heatStress": 0.3,
+    "droughtRisk": 0.2,
+    "floodRisk": 0.1,
+    "windDamage": 0.15
+  },
+  "seasonalOutlook": {
+    "nextMonth": {
+      "avgTemp": 26.5,
+      "precipitation": 15.2,
+      "conditions": "Mostly clear with occasional rain"
+    },
+    "nextSeason": {
+      "avgTemp": 28.1,
+      "precipitation": 45.0,
+      "conditions": "Warmer and wetter than average"
+    }
+  },
+  "weatherAlerts": [
+    {
+      "type": "Wind Advisory",
+      "severity": "Moderate",
+      "expires": "2023-11-16T18:00:00Z",
+      "description": "Winds expected to reach 25-30 km/h from the south"
+    }
+  ],
+  "agronomicIndicators": {
+    "gdd": 1250,
+    "et0": 4.2,
+    "frostRisk": 0.05,
+    "heatUnits": 1280
+  }
+}
