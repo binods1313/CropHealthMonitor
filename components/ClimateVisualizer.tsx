@@ -323,7 +323,7 @@ const ClimateVisualizer: React.FC = () => {
         </div>
 
         {/* 3-Day Forecast Section - Enhanced with Neon Borders and Background Colors */}
-        <div className="space-y-8">
+        <div id="three-day-node-forecast" className="space-y-8">
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-4">
                     <div className="h-1.5 w-12 rounded-full bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
@@ -336,38 +336,48 @@ const ClimateVisualizer: React.FC = () => {
                     // Determine theme color based on condition
                     const themeColor = day.condition === 'Clear' ? '#f59e0b' : day.condition === 'Rain' ? '#3b82f6' : day.condition === 'Thunderstorm' ? '#8b5cf6' : accentColor;
                     const softBg = day.condition === 'Clear' ? '#fffbeb' : day.condition === 'Rain' ? '#eff6ff' : day.condition === 'Thunderstorm' ? '#f5f3ff' : '#f0fdf4';
-                    
+
+                    // Determine day abbreviation for background color mapping
+                    const dayAbbrev = day.day.substring(0, 3).toUpperCase();
+                    const dayAbbrevMap: Record<string, string> = {
+                        'SUN': '#f0f0f0',
+                        'MON': '#fff9c4',
+                        'TUE': '#e3f2fd'
+                    };
+                    const backgroundColor = dayAbbrevMap[dayAbbrev] || softBg;
+
                     return (
-                        <div 
-                            key={idx} 
-                            className="p-8 rounded-[3rem] border-2 transition-all duration-500 group hover:-translate-y-3 flex flex-col items-center text-center space-y-6 relative overflow-hidden shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
-                            style={{ 
-                                backgroundColor: softBg,
+                        <div
+                            key={idx}
+                            data-day={dayAbbrev}
+                            className="p-8 rounded-[3rem] border-2 transition-all duration-500 group hover:-translate-y-3 flex flex-col items-center text-center space-y-6 relative overflow-hidden shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] forecast-card"
+                            style={{
+                                backgroundColor: backgroundColor,
                                 borderColor: themeColor,
                                 boxShadow: `0 0 20px ${themeColor}15, inset 0 0 10px ${themeColor}05`
                             }}
                         >
                             {/* Neon Glow Overlay */}
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" style={{ background: `radial-gradient(circle at center, ${themeColor}, transparent)` }}></div>
-                            
+
                             <div className="absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000" style={{ backgroundColor: themeColor }}></div>
-                            
+
                             <div className="space-y-1 relative z-10">
                                 <p className="text-xs font-black text-stone-400 uppercase tracking-[0.3em]">{day.day}</p>
                                 <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: themeColor }}>METEOR_SYNC</p>
                             </div>
-                            
+
                             <div className="p-6 bg-white/60 backdrop-blur-md rounded-[2rem] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 relative z-10 shadow-sm border border-white/50 animate-marker-pulse">
                                 {renderWeatherIcon(day.condition)}
                             </div>
-                            
+
                             <div className="relative z-10 w-full">
                                 <p className="text-5xl font-black text-stone-900 tracking-tighter leading-none">{day.temp}°C</p>
                                 <h3 className="text-sm font-black tracking-tight uppercase leading-tight transition-colors mt-3 text-stone-500">
                                     {day.condition}
                                 </h3>
                             </div>
-                            
+
                             <div className="w-full pt-6 border-t border-stone-200/50 grid grid-cols-2 gap-4 relative z-10">
                                 <div className="text-left">
                                     <span className="text-[9px] font-black text-stone-300 uppercase block mb-1">Precip</span>
@@ -382,7 +392,7 @@ const ClimateVisualizer: React.FC = () => {
                     );
                 }) : (
                     Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="bg-stone-50 p-8 rounded-[3rem] border border-stone-100 animate-pulse h-80"></div>
+                        <div key={i} className="bg-stone-50 p-8 rounded-[3rem] border border-stone-100 animate-pulse h-80 forecast-card" data-day={i === 0 ? 'SUN' : i === 1 ? 'MON' : 'TUE'}></div>
                     ))
                 )}
             </div>
@@ -712,6 +722,19 @@ const ClimateVisualizer: React.FC = () => {
           50% { transform: scale(1.08); }
         }
         .animate-marker-pulse { animation: marker-pulse 2s ease-in-out infinite; }
+
+        /* Background colors for forecast cards */
+        #three-day-node-forecast .forecast-card[data-day="SUN"] {
+          background-color: #f0f0f0 !important;
+        }
+
+        #three-day-node-forecast .forecast-card[data-day="MON"] {
+          background-color: #fff9c4 !important;
+        }
+
+        #three-day-node-forecast .forecast-card[data-day="TUE"] {
+          background-color: #e3f2fd !important;
+        }
       `}</style>
     </div>
   );
