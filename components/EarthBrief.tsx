@@ -747,7 +747,7 @@ const ZoomControl = () => {
 const LayerControl = ({ activeLayer, onChange }: { activeLayer: string, onChange: (l: string) => void }) => {
     return (
         <div className="layer-control">
-            {['SATELLITE', 'WEATHER', 'CROPLANDS', 'REFERENCE', 'TERRAIN'].map(layer => (
+            {['WEATHER', 'CROPLANDS', 'REFERENCE', 'TERRAIN', 'SATELLITE'].map(layer => (
                 <button
                     key={layer}
                     className={activeLayer === layer.toLowerCase() ? 'active' : ''}
@@ -774,7 +774,7 @@ interface GeoNewsItem {
 }
 
 const GeoNewsMap: React.FC = () => {
-    const [activeLayer, setActiveLayer] = useState('satellite');
+    const [activeLayer, setActiveLayer] = useState('terrain'); // Changed default to terrain to match new order
     const [newsData, setNewsData] = useState<GeoNewsItem[]>([]);
     const [timeFilter, setTimeFilter] = useState('week');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -1379,14 +1379,14 @@ const EarthBrief: React.FC = () => {
         .layer-control {
             position: absolute;
             top: 20px;
-            right: 99px; /* Increased from 80px to 80+19=99px to move 0.5cm (19px) to the right */
+            right: 118px; /* Increased from 99px to 118px to move additional 0.2cm (approx 7px) to the right */
             z-index: 1003; /* Increased to ensure it's above other map elements */
             display: flex;
             gap: 6px;
         }
 
         .layer-control button {
-            padding: 8px 10px;
+            padding: 8px 8px; /* Reduced horizontal padding to make buttons narrower (0.2cm reduction) */
             background: rgba(0, 0, 0, 0.9);
             border: 1px solid #333;
             color: #fff;
@@ -1397,6 +1397,7 @@ const EarthBrief: React.FC = () => {
             text-transform: uppercase;
             transition: all 0.3s;
             white-space: nowrap;
+            min-width: 60px; /* Reduced width to accommodate the 0.2cm reduction */
         }
 
         .layer-control button:hover {
