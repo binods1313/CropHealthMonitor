@@ -9,6 +9,7 @@ import { ThemeProvider } from './ThemeContext';
 const CropHealthReport = lazy(() => import('./components/CropHealthReport'));
 const DisasterDetect = lazy(() => import('./components/DisasterDetect'));
 const ClimateVisualizer = lazy(() => import('./components/ClimateVisualizer'));
+const EarthBrief = lazy(() => import('./components/EarthBrief'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center">
@@ -28,6 +29,7 @@ const App: React.FC = () => {
             <Route path="/report/:farmId" element={<CropHealthReport />} />
             <Route path="/disasters" element={<DisasterDetect />} />
             <Route path="/climate" element={<ClimateVisualizer />} />
+            <Route path="/earthbrief" element={<EarthBrief />} />
           </Routes>
         </Suspense>
       </HashRouter>

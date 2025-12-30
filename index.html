@@ -1,75 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CropHealth Monitor - Gemini Vibe Check</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              agri: {
-                50: '#f0fdf4',
-                100: '#dcfce7',
-                500: '#22c55e',
-                600: '#16a34a',
-                700: '#15803d',
-                800: '#166534',
-                900: '#14532d',
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CropHealth Monitor - Gemini Vibe Check</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            agri: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
             }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
           }
         }
-      };
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- 1. Leaflet Core -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-    <!-- 2. Leaflet Draw Plugin -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-
-    <!-- 3. Leaflet MarkerCluster Plugin -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-
-    <style>
-      :root {
-        --accent-main: #10b981;
-        --accent-soft: rgba(16, 185, 129, 0.1);
-        --accent-border: rgba(16, 185, 129, 0.4);
       }
-      body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
-      #root { width: 100%; height: 100vh; }
-      .leaflet-container { width: 100%; height: 100%; z-index: 1; }
-      
-      /* Theme Helpers */
-      .bg-theme-main { background-color: var(--accent-main); }
-      .bg-theme-soft { background-color: var(--accent-soft); }
-      .text-theme-main { color: var(--accent-main); }
-      .border-theme-main { border-color: var(--accent-main); }
-      .border-theme-border { border-color: var(--accent-border); }
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-      /* Animations */
-      @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes scale-in { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-      .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
-      .animate-scale-in { animation: scale-in 0.2s ease-out forwards; }
+  <!-- 1. Leaflet Core -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-      @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
+  <!-- 2. Leaflet Draw Plugin -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+  <!-- 3. Leaflet MarkerCluster Plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    :root {
+      --accent-main: #10b981;
+      --accent-soft: rgba(16, 185, 129, 0.1);
+      --accent-border: rgba(16, 185, 129, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    #root {
+      width: 100%;
+      height: 100vh;
+    }
+
+    .leaflet-container {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Theme Helpers */
+    .bg-theme-main {
+      background-color: var(--accent-main);
+    }
+
+    .bg-theme-soft {
+      background-color: var(--accent-soft);
+    }
+
+    .text-theme-main {
+      color: var(--accent-main);
+    }
+
+    .border-theme-main {
+      border-color: var(--accent-main);
+    }
+
+    .border-theme-border {
+      border-color: var(--accent-border);
+    }
+
+    /* Animations */
+    @keyframes fade-in {
+      from {
+        opacity: 0;
       }
-    </style>
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scale-in {
+      from {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.2s ease-out forwards;
+    }
+
+    .animate-scale-in {
+      animation: scale-in 0.2s ease-out forwards;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Rotational Animations */
+    @keyframes spin-slow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spin-reverse-slow {
+      from {
+        transform: rotate(360deg);
+      }
+
+      to {
+        transform: rotate(0deg);
+      }
+    }
+
+    @keyframes spin-extra-slow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .animate-spin-slow {
+      animation: spin-slow 12s linear infinite;
+    }
+
+    .animate-spin-reverse-slow {
+      animation: spin-reverse-slow 15s linear infinite;
+    }
+
+    .animate-spin-extra-slow {
+      animation: spin-extra-slow 20s linear infinite;
+    }
+
+    /* New 20s Reverse Animation */
+    @keyframes spin-reverse-extra-slow {
+      from {
+        transform: rotate(360deg);
+      }
+
+      to {
+        transform: rotate(0deg);
+      }
+    }
+
+    .animate-spin-reverse-extra-slow {
+      animation: spin-reverse-extra-slow 20s linear infinite;
+    }
+
+    /* New 40s Reverse Animation for Slower Rotation */
+    @keyframes spin-reverse-ultra-slow {
+      from {
+        transform: rotate(360deg);
+      }
+
+      to {
+        transform: rotate(0deg);
+      }
+    }
+
+    .animate-spin-reverse-ultra-slow {
+      animation: spin-reverse-ultra-slow 40s linear infinite;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -96,8 +231,10 @@
 }
 </script>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
