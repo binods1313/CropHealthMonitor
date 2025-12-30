@@ -13,9 +13,19 @@ export async function fetchWithFallback<T>(
   errorMessage: string = "API call failed"
 ): Promise<T> {
   try {
+    // Check if we're in a Node.js environment (server-side)
+    const isServer = typeof window === 'undefined';
+
+    if (isServer) {
+      // On the server, we can't make requests to relative URLs
+      // Return mock data to avoid errors during SSR
+      console.warn(`${errorMessage}: Running on server, returning mock data`);
+      return mockData;
+    }
+
     // Attempt the API call
     const result = await apiCall();
-    
+
     // If the result is valid (not null, undefined, or empty), return it
     if (result !== null && result !== undefined) {
       // For objects/arrays, check if they have content
@@ -34,14 +44,14 @@ export async function fetchWithFallback<T>(
         return result;
       }
     }
-    
+
     // If we get here, the API call returned an empty result
     console.warn(`${errorMessage}: API returned empty result, using mock data`);
     return mockData;
   } catch (error) {
     // Log the error with details
     console.warn(`${errorMessage}:`, error);
-    
+
     // Return mock data as fallback
     return mockData;
   }

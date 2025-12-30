@@ -1,44 +1,29 @@
-URGENT: My Vite + React CropHealthMonitor app deploys to Vercel but shows 404.
+Quick Fix for Satellite Button Overlap:
+Move the entire button group (SATELLITE, WEATHER, CROPLANDS, REFERENCE, TERRAIN) 0.5cm to the right to prevent it from overlapping with the search bar.
+In CSS terms, add:
 
-LOCAL: npm run dev → http://localhost:3000 WORKS PERFECTLY
-VERCEL: https://v3-crophealthmonitor-l9z4j4h5k.vercel.app → 404 NOT FOUND
+margin-left: 0.5cm or
+left: 0.5cm (if using absolute positioning) or
+Approximately margin-left: 19px (0.5cm ≈ 19px at standard screen DPI)
 
-Project structure (from dir):
-✅ package.json, vite.config.ts, index.html, src/App.tsx, components/, constants/
-✅ Build locally works: npm run build → dist/ folder exists
+This should create enough space between the search section and these buttons to prevent overlap.
 
-TASK: Fix Vercel deployment so app loads at crophealthai.vercel.app
+Zoom Controls (+/-) Size and Functionality:
 
-CREATE THESE FILES:
+The +/- zoom buttons appear too small and non-functional
+Increase the button size to make them more visible and clickable (suggest minimum 40x40px touch target)
+Verify click event handlers are properly attached
+Add visual hover/active states to indicate they're interactive
+Ensure z-index is high enough that they're not blocked by other elements
 
-1. vercel.json (root):
-{
-"buildCommand": "npm run build",
-"outputDirectory": "dist"
-}
 
-text
+Configuration Modal Issue:
 
-2. Ensure package.json scripts:
-"scripts": {
-"dev": "vite",
-"build": "vite build",
-"preview": "vite preview"
-}
+When opening the configuration/theme settings, the Firecrawl Credit Tracker card is displaying inside the modal
+Remove or hide the Firecrawl Credit Tracker from the configuration modal
+The configuration modal should only show appearance theme options (the color circles)
+Check if the Credit Tracker is accidentally nested within the configuration component - it should be separate
 
-text
 
-3. Check vite.config.ts:
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-plugins: [react()],
-build: { outDir: 'dist' }
-})
-
-text
-
-TEST: npm run build → dist/index.html exists → git push → Vercel live!
-
-DEADLINE: 15 minutes 🚀
+Summary: Fix z-index layering conflicts, increase zoom button sizes, ensure proper event handlers, and separate the Credit Tracker from the configuration modal UI.

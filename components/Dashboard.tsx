@@ -12,6 +12,7 @@ import SavedReportsModal from './SavedReportsModal';
 import FarmEditModal from './FarmEditModal';
 import FarmDiscoveryCard from './FarmDiscoveryCard';
 import Footer from './Footer';
+import FirecrawlEnhancedAnalysis from './FirecrawlEnhancedAnalysis';
 import { FarmData, WeatherData, SavedReport, Region, ForecastDay } from '../types';
 import {
   LayoutDashboard, Activity, ShieldAlert, Leaf, Settings, History, Search,
@@ -55,7 +56,7 @@ const HealthPattern = ({ color }: { color: string }) => (
 
 const ClimatePattern = ({ color }: { color: string }) => (
   <div className="absolute -top-12 -right-12 w-64 h-64 pointer-events-none group-hover:scale-110 transition-transform duration-[2000ms] ease-out z-0">
-    <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.48] group-hover:opacity-[0.8] transition-opacity duration-700 animate-spin-reverse-slow" fill="none" stroke={color} strokeWidth="1.2">
+    <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.48] group-hover:opacity-[0.8] transition-opacity duration-700 animate-spin-reverse-ultra-slow" fill="none" stroke={color} strokeWidth="1.2">
       <circle cx="100" cy="100" r="32" />
       {[0, 60, 120, 180, 240, 300].map(deg => {
         const rad = (deg * Math.PI) / 180;
@@ -76,6 +77,20 @@ const RiskPattern = ({ color }: { color: string }) => (
   </div>
 );
 
+const EarthBriefPattern = ({ color }: { color: string }) => (
+  <div className="absolute -top-12 -right-12 w-64 h-64 pointer-events-none group-hover:scale-110 transition-transform duration-[2000ms] ease-out z-0">
+    <svg viewBox="0 0 200 200" className="w-full h-full opacity-[0.48] group-hover:opacity-[0.8] transition-opacity duration-700 animate-spin-reverse-ultra-slow" fill="none" stroke={color} strokeWidth="1.2">
+      <circle cx="100" cy="100" r="15" />
+      <circle cx="100" cy="100" r="80" strokeDasharray="10 10" />
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(deg => {
+        const rad = (deg * Math.PI) / 180;
+        return <circle key={deg} cx={100 + 80 * Math.cos(rad)} cy={100 + 80 * Math.sin(rad)} r="4" fill={color} fillOpacity="0.4" />;
+      })}
+      <path d="M100 20 L100 180 M20 100 L180 100" strokeOpacity="0.3" dasharray="4 4" />
+    </svg>
+  </div>
+);
+
 interface DashboardCardData {
   id: string;
   title: string;
@@ -85,13 +100,13 @@ interface DashboardCardData {
   color: string;
   gradient: string;
   route: string;
-  vedicType: 'health' | 'climate' | 'risk';
+  vedicType: 'health' | 'climate' | 'risk' | 'earthbrief';
 }
 
 const DASHBOARD_CARDS: DashboardCardData[] = [
   {
     id: 'health',
-    title: 'HEALTH',
+    title: 'SITE HEALTH',
     subtitle: 'PRECIZION NDVI INTEL',
     description: 'Deep-spectral analysis of crop vigor indices.',
     icon: Leaf,
@@ -102,7 +117,7 @@ const DASHBOARD_CARDS: DashboardCardData[] = [
   },
   {
     id: 'climate',
-    title: 'CLIMATE',
+    title: 'CLIMATE NODE',
     subtitle: 'RESILIENCE & EMISSIONS',
     description: '2030 climate adaptation roadmaps.',
     icon: Cloud,
@@ -113,7 +128,7 @@ const DASHBOARD_CARDS: DashboardCardData[] = [
   },
   {
     id: 'risks',
-    title: 'RISKS',
+    title: 'RISK VECTORS',
     subtitle: 'TACTICAL THREAT DETECTION',
     description: 'Surveillance of disaster vectors.',
     icon: ShieldAlert,
@@ -121,6 +136,17 @@ const DASHBOARD_CARDS: DashboardCardData[] = [
     gradient: 'linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0.05) 100%)',
     route: '/disasters',
     vedicType: 'risk'
+  },
+  {
+    id: 'earthbrief',
+    title: 'EARTHBRIEF',
+    subtitle: 'GLOBAL INTEL STREAM',
+    description: 'Synthesized agricultural news & trends.',
+    icon: Globe,
+    color: '#FF6F00',
+    gradient: 'linear-gradient(135deg, rgba(255, 111, 0, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%)',
+    route: '/earthbrief',
+    vedicType: 'earthbrief'
   }
 ];
 
@@ -146,6 +172,7 @@ const MagicalDirectiveCard: React.FC<{
       {card.vedicType === 'health' && <HealthPattern color={card.color} />}
       {card.vedicType === 'climate' && <ClimatePattern color={card.color} />}
       {card.vedicType === 'risk' && <RiskPattern color={card.color} />}
+      {card.vedicType === 'earthbrief' && <EarthBriefPattern color={card.color} />}
 
       <div className="relative z-10 w-full">
         <div className="flex items-start justify-between mb-6">
@@ -208,6 +235,10 @@ const Dashboard: React.FC = () => {
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
   const [filterCrop, setFilterCrop] = useState<string>('CROP ALL');
 
+  // Firecrawl Enhancement State
+  const [isWebEnhancementEnabled, setIsWebEnhancementEnabled] = useState(false);
+  const [firecrawlAnalysisType, setFirecrawlAnalysisType] = useState<'quick-search' | 'deep-analysis' | 'portal-sync'>('quick-search');
+
   const displayedFarms = useMemo(() => {
     return allFarms.filter(f => {
       if (filterCrop !== 'CROP ALL' && f.crop.toUpperCase() !== filterCrop.toUpperCase()) return false;
@@ -261,9 +292,53 @@ const Dashboard: React.FC = () => {
     setAnalyzing(true);
     try {
       const visualAssets = await generateDualFarmImages(activeFarm);
-      const result = await analyzeFarmHealth(activeFarm, NDVI_STATS, "", activeFarm.soil);
-      navigate(`/report/${activeFarm.id}`, { state: { farm: activeFarm, report: result, generatedImages: visualAssets } });
-    } catch (e) { console.error("Diagnosis critical failure."); } finally { setAnalyzing(false); }
+
+      let result;
+      if (isWebEnhancementEnabled) {
+        // Call the enhanced API if web enhancement is enabled
+        const response = await fetch('/api/firecrawl-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cropType: activeFarm.crop,
+            region: activeFarm.location,
+            farmerId: activeFarm.id,
+            analysisType: firecrawlAnalysisType
+          })
+        });
+        const enhancedResult = await response.json();
+
+        if (enhancedResult.success) {
+          // Combine data for the report
+          result = {
+            ...enhancedResult.data.geminiAnalysis,
+            firecrawlInsights: enhancedResult.data.firecrawlInsights,
+            healthScore: enhancedResult.data.combinedScore
+          };
+        } else {
+          // Fallback to gemini only
+          result = enhancedResult.data.geminiAnalysis;
+        }
+      } else {
+        // Default Gemini-only analysis
+        result = await analyzeFarmHealth(activeFarm, NDVI_STATS, "", activeFarm.soil);
+      }
+
+      navigate(`/report/${activeFarm.id}`, {
+        state: {
+          farm: activeFarm,
+          report: result,
+          generatedImages: visualAssets,
+          isWebEnhanced: isWebEnhancementEnabled
+        }
+      });
+    } catch (e) {
+      console.error("Diagnosis critical failure:", e);
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
@@ -317,23 +392,30 @@ const Dashboard: React.FC = () => {
               CROPHEALTH <span style={{ color: accentColor }}>AI</span>
             </span>
           </div>
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             {[
-              { id: '/', label: 'HEALTH', icon: Leaf, color: '#10b981' },
-              { id: '/climate', label: 'CLIMATE', icon: Cloud, color: '#3b82f6' },
-              { id: '/disasters', label: 'RISKS', icon: ShieldAlert, color: '#f43f5e' }
+              { id: '/', label: 'SITE HEALTH', icon: LayoutDashboard, color: '#10b981' },
+              { id: '/climate', label: 'CLIMATE NODE', icon: Activity, color: '#3b82f6' },
+              { id: '/disasters', label: 'RISK VECTORS', icon: ShieldAlert, color: '#f43f5e' },
+              { id: '/earthbrief', label: 'EARTHBRIEF', icon: Globe, color: '#10b981', isSpecial: true }
             ].map(link => {
               const isActive = link.id === '/' ? location.pathname === '/' : location.pathname.startsWith(link.id);
               return (
                 <button
                   key={link.id}
                   onClick={() => navigate(link.id)}
-                  className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all
+                  className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all relative
                     ${isActive ? 'bg-white/10 text-white border border-white/20' : 'text-stone-500 hover:text-white'}`}
-                  style={{ color: isActive ? accentColor : undefined }}
+                  style={{ color: isActive ? link.color : undefined }}
                 >
-                  <link.icon size={14} strokeWidth={isActive ? 3 : 2.5} />
+                  <div className="relative">
+                    <link.icon size={14} strokeWidth={isActive ? 3 : 2.5} />
+                    {link.isSpecial && (
+                      <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
+                    )}
+                  </div>
                   {link.label}
+                  {link.isSpecial && <Sparkles size={8} className="text-emerald-500 animate-pulse ml-[-4px]" />}
                 </button>
               );
             })}
@@ -571,6 +653,24 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Firecrawl Enhanced Analysis Section */}
+      <section className="max-w-[1400px] mx-auto px-8 pb-24">
+        <div className="flex items-center justify-between mb-8 px-2">
+          <div className="flex items-center gap-4">
+            <div className="h-1.5 w-12 rounded-full" style={{ backgroundColor: accentColor }}></div>
+            <h2 className="text-[12px] font-black text-stone-400 uppercase tracking-[0.6em]">Web Data Enhancement</h2>
+          </div>
+          <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest italic">Powered by Firecrawl</p>
+        </div>
+        <FirecrawlEnhancedAnalysis
+          farm={activeFarm}
+          isEnabled={isWebEnhancementEnabled}
+          setIsEnabled={setIsWebEnhancementEnabled}
+          analysisType={firecrawlAnalysisType}
+          setAnalysisType={setFirecrawlAnalysisType}
+        />
+      </section>
 
       <Footer />
 

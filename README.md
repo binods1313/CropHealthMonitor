@@ -59,16 +59,50 @@ All Excel operations should now use the safe wrapper functions in `utils/safeExc
 - All Excel-related operations are logged for security monitoring
 - Re-audit dependencies regularly (npm audit) to catch updates
 
+## Firecrawl Integration
+
+### Setup
+The project now includes Firecrawl integration for enhanced web data analysis. To use this feature:
+
+1. Install the Firecrawl SDK:
+   ```bash
+   npm install @mendable/firecrawl-js axios
+   ```
+
+2. Add Firecrawl API key to your `.env` file:
+   ```
+   VITE_FIRECRAWL_API_KEY=your_firecrawl_api_key_here
+   ```
+
+### Features
+- **Real-time Web Data Enhancement**: Toggle to enable live data from agricultural sources
+- **Credit Tracking**: Automatic tracking of Firecrawl API usage (600 monthly limit)
+- **Multiple Analysis Types**:
+  - Quick Search (5-10 credits): Find crop health information
+  - Deep Analysis (15-20 credits): Autonomous crop analysis
+  - Portal Sync (30-50 credits): Crawl agricultural websites
+  - Data Scraping (3-5 credits): Extract structured data
+
+### Credit Management
+- Monthly credit limit: 600 credits
+- Credit usage tracked in localStorage
+- Automatic throttling when approaching limits
+- Detailed breakdown of usage by operation type
+
+### Fallback Mechanism
+If Firecrawl API is unavailable or credits are exhausted, the application seamlessly falls back to existing Gemini AI analysis without any disruption to functionality.
+
 ## API Configuration: Fallback to Mock Data
 
 ### Approach
-The app prioritizes live API calls to Gemini, NASA, and OpenWeather services. If any API key is missing, invalid, or the request fails, the app automatically falls back to mock/simulated data to keep all dashboards functional.
+The app prioritizes live API calls to Gemini, NASA, OpenWeather, and Firecrawl services. If any API key is missing, invalid, or the request fails, the app automatically falls back to mock/simulated data to keep all dashboards functional.
 
 ### Configuration
 The app uses the following environment variables for API access:
 - `VITE_GEMINI_API_KEY` - Gemini AI API key
 - `VITE_NASA_API_KEY` - NASA API key (for EONET data)
 - `VITE_OPENWEATHER_API_KEY` - OpenWeatherMap API key
+- `VITE_FIRECRAWL_API_KEY` - Firecrawl API key (optional)
 
 ### Fallback Mechanism
 All API calls use the `fetchWithFallback` utility function which:
@@ -88,6 +122,7 @@ The fallback mechanism is implemented in:
 - `utils/apiFallback.ts` - Contains the `fetchWithFallback` utility function
 - `services/geminiService.ts` - Updated to use fallback for Gemini API calls
 - `services/weatherService.ts` - Updated to use fallback for OpenWeatherMap API calls
+- `services/firecrawlService.ts` - Updated to use fallback for Firecrawl API calls
 - `server/routes/disasters.ts` - Updated to use fallback for NASA EONET API calls
 
 ### Verification

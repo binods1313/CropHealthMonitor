@@ -15,14 +15,14 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#111827] border border-white/10 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in">
+      <div className="bg-[#111827] border border-white/10 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0 bg-[#111827]">
           <div className="flex items-center gap-3">
             <Settings size={18} className="text-white/40" />
             <h2 className="text-white font-medium text-base tracking-tight">Configuration</h2>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="text-white/40 hover:text-white transition-colors"
           >
@@ -31,8 +31,8 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-8">
-          <section className="space-y-4">
+        <div className="p-6 space-y-8 overflow-y-auto">
+          <section className="space-y-4 relative z-10">
             <div className="flex items-center gap-2 text-white/90">
               <Palette size={16} className="text-red-500" />
               <h3 className="text-sm font-semibold">Appearance Theme</h3>
@@ -60,8 +60,6 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose }) => {
             </p>
           </section>
 
-          <hr className="border-white/5" />
-
           <div className="bg-[#1a202c] rounded-lg p-5 border border-white/5 space-y-3">
             <p className="text-xs text-white/50 leading-relaxed">
               Note: API Key is managed via environment variables.
@@ -71,7 +69,7 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          <button 
+          <button
             onClick={onClose}
             className="w-full py-3.5 bg-[#1f2937] hover:bg-[#374151] text-white text-sm font-semibold rounded-lg transition-all border border-white/5"
           >
