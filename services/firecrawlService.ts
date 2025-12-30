@@ -10,7 +10,7 @@ interface CreditUsage {
 
 class FirecrawlService {
   private creditUsage: CreditUsage;
-  private monthlyLimit: number = Number(import.meta.env.VITE_FIRECRAWL_MONTHLY_CREDITS) || 600;
+  private monthlyLimit: number = 600; // Default value, will be overridden if config is available
 
   constructor() {
     // Load credit usage from localStorage
@@ -32,8 +32,27 @@ class FirecrawlService {
       };
     }
 
+    // Initialize monthly limit from config
+    this.initializeMonthlyLimit();
+
     // Check if we need to reset monthly usage
     this.checkMonthlyReset();
+  }
+
+  private initializeMonthlyLimit(): void {
+    try {
+      // Try to get the monthly credits from config
+      import('../src/config').then(({ getConfigValue }) => {
+        const monthlyCreditsValue = getConfigValue('FIRECRAWL_MONTHLY_CREDITS');
+        this.monthlyLimit = Number(monthlyCreditsValue) || 600;
+      }).catch(() => {
+        // Fallback to environment variable
+        this.monthlyLimit = Number(import.meta.env.VITE_FIRECRAWL_MONTHLY_CREDITS) || 600;
+      });
+    } catch (error) {
+      // Fallback to environment variable
+      this.monthlyLimit = Number(import.meta.env.VITE_FIRECRAWL_MONTHLY_CREDITS) || 600;
+    }
   }
 
   private checkMonthlyReset(): void {

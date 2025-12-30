@@ -20,7 +20,17 @@ function isFirecrawlCreditError(error: any): boolean {
 
 // Perplexity API Helper
 async function callPerplexity(prompt: string) {
-    const apiKey = process.env.PERPLEXITY_API_KEY || process.env.VITE_PERPLEXITY_API_KEY;
+    let apiKey = '';
+
+    try {
+        // Try to get the API key from config
+        const configModule = require('../src/config');
+        apiKey = configModule.getApiKey('perplexityKey');
+    } catch (error) {
+        // Fallback to environment variables if config module fails to load
+        apiKey = process.env.PERPLEXITY_API_KEY || process.env.VITE_PERPLEXITY_API_KEY || '';
+    }
+
     if (!apiKey) {
         throw new Error('PERPLEXITY_API_KEY or VITE_PERPLEXITY_API_KEY not configured in .env');
     }
@@ -107,8 +117,17 @@ export default async function handler(req: any, res: any) {
             farm = MOCK_FARMS[0]; // Default to first farm if not found
         }
 
-        // Check if Firecrawl API key is available
-        const hasFirecrawlKey = !!(process.env.FIRECRAWL_API_KEY || process.env.VITE_FIRECRAWL_API_KEY);
+        // Check if Firecrawl API key is available using config
+        const hasFirecrawlKey = (() => {
+            try {
+                // Try to check using config, fallback to environment variables
+                const configModule = require('../src/config');
+                return configModule.isKeyConfigured('firecrawlKey');
+            } catch (error) {
+                // Fallback to environment variables if config module fails to load
+                return !!(process.env.FIRECRAWL_API_KEY || process.env.VITE_FIRECRAWL_API_KEY);
+            }
+        })();
 
         let firecrawlInsights: any = null;
         let creditsUsed = 0;

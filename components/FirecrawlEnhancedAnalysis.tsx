@@ -32,11 +32,20 @@ const FirecrawlEnhancedAnalysis: React.FC<FirecrawlEnhancedAnalysisProps> = ({
   const availableOperations = firecrawlService.getAvailableOperations();
 
   useEffect(() => {
-    // Check if Firecrawl API key is configured
-    const hasApiKey = !!(import.meta as any).env.VITE_FIRECRAWL_API_KEY;
-    if (!hasApiKey) {
-      setError('FIRECRAWL_API_KEY not configured. Web enhancement unavailable.');
-    }
+    // Check if Firecrawl API key is configured using the new config file
+    import('../src/config').then(({ isKeyConfigured }) => {
+      const isConfigured = isKeyConfigured('firecrawlKey');
+      if (!isConfigured) {
+        setError('FIRECRAWL_API_KEY not configured. Web enhancement unavailable.');
+      }
+    }).catch(err => {
+      console.error('Error loading config:', err);
+      // Fallback to original check
+      const hasApiKey = !!(import.meta as any).env.VITE_FIRECRAWL_API_KEY;
+      if (!hasApiKey) {
+        setError('FIRECRAWL_API_KEY not configured. Web enhancement unavailable.');
+      }
+    });
   }, []);
 
   const handleEnhanceAnalysis = async () => {

@@ -8,7 +8,17 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    let apiKey = '';
+
+    try {
+        // Try to get the API key from config
+        const configModule = require('../src/config');
+        apiKey = configModule.getApiKey('geminiKey');
+    } catch (error) {
+        // Fallback to environment variables if config module fails to load
+        apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
+    }
+
     if (!apiKey) {
         return res.status(500).json({ error: "Gemini API key is not configured on the server." });
     }

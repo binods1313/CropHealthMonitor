@@ -83,9 +83,13 @@ export default defineConfig(({ mode }) => {
       }
     ],
     define: {
+      'process.env': JSON.stringify(process.env),
       'process.env.VITE_NASA_API_KEY': JSON.stringify(env.VITE_NASA_API_KEY),
       'process.env.VITE_OPENWEATHER_API_KEY': JSON.stringify(env.VITE_OPENWEATHER_API_KEY),
-      'process.env.VITE_FIRECRAWL_API_KEY': JSON.stringify(env.VITE_FIRECRAWL_API_KEY)
+      'process.env.VITE_FIRECRAWL_API_KEY': JSON.stringify(env.VITE_FIRECRAWL_API_KEY),
+      'process.env.VITE_GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+      'process.env.VITE_MAPBOX_API_KEY': JSON.stringify(env.VITE_MAPBOX_API_KEY),
+      'process.env.VITE_PERPLEXITY_API_KEY': JSON.stringify(env.VITE_PERPLEXITY_API_KEY)
     },
     resolve: {
       alias: {
