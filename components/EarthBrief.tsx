@@ -1379,7 +1379,7 @@ const EarthBrief: React.FC = () => {
         .layer-control {
             position: absolute;
             top: 20px;
-            right: 141px; /* Moved 0.6cm (approx 23px) to the right from previous position of 118px (118+23=141) */
+            right: 57px; /* Moved 0.6cm (approx 23px) to the right from original position of 80px (80-23=57) */
             z-index: 1003; /* Increased to ensure it's above other map elements */
             display: flex;
             gap: 6px;
