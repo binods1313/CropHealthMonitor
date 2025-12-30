@@ -747,7 +747,7 @@ const ZoomControl = () => {
 const LayerControl = ({ activeLayer, onChange }: { activeLayer: string, onChange: (l: string) => void }) => {
     return (
         <div className="layer-control">
-            {['WEATHER', 'CROPLANDS', 'REFERENCE', 'TERRAIN', 'SATELLITE'].map(layer => (
+            {['SATELLITE', 'WEATHER', 'CROPLANDS', 'REFERENCE', 'TERRAIN'].map(layer => (
                 <button
                     key={layer}
                     className={activeLayer === layer.toLowerCase() ? 'active' : ''}
@@ -774,7 +774,7 @@ interface GeoNewsItem {
 }
 
 const GeoNewsMap: React.FC = () => {
-    const [activeLayer, setActiveLayer] = useState('terrain'); // Changed default to terrain to match new order
+    const [activeLayer, setActiveLayer] = useState('satellite'); // Changed default to satellite to match new order
     const [newsData, setNewsData] = useState<GeoNewsItem[]>([]);
     const [timeFilter, setTimeFilter] = useState('week');
     const [selectedCategory, setSelectedCategory] = useState('all');
