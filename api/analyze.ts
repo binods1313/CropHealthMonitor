@@ -8,18 +8,24 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
 
+    console.log('API Key:', process.env.GEMINI_API_KEY ? 'exists' : 'missing');
+    console.log('VITE_GEMINI_API_KEY:', process.env.VITE_GEMINI_API_KEY ? 'exists' : 'missing');
+
     let apiKey = '';
 
     try {
         // Try to get the API key from config
         const configModule = require('../src/config');
         apiKey = configModule.getApiKey('geminiKey');
+        console.log('API Key from config:', apiKey ? 'exists' : 'missing');
     } catch (error) {
+        console.log('Error loading config:', error.message);
         // Fallback to environment variables if config module fails to load
         apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
     }
 
     if (!apiKey) {
+        console.log('ERROR: Gemini API key is not configured on the server.');
         return res.status(500).json({ error: "Gemini API key is not configured on the server." });
     }
 
@@ -29,6 +35,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Initialize with the object pattern
+    console.log('Initializing GoogleGenAI with API key:', apiKey ? 'yes' : 'no');
     const ai = new GoogleGenAI(apiKey);
 
     try {
@@ -60,7 +67,15 @@ export default async function handler(req: any, res: any) {
 
                 for (const model of disasterModels) {
                     try {
+                        console.log(`[AI] Attempting to get disaster model: ${model}`);
                         const modelInstance = ai.models.get(model);
+                        console.log(`[AI] Disaster model object retrieved:`, !!modelInstance);
+
+                        if (!modelInstance || typeof modelInstance.generateContent !== 'function') {
+                            console.warn(`[AI] Disaster model ${model} does not have generateContent function`);
+                            continue;
+                        }
+
                         disasterResponse = await modelInstance.generateContent({
                             contents: [{ role: 'user', parts: [{ text: riskPrompt }] }],
                             generationConfig: {
@@ -72,6 +87,7 @@ export default async function handler(req: any, res: any) {
                         break;
                     } catch (error: any) {
                         console.warn(`[AI] Disaster risk analysis with ${model} failed:`, error.message);
+                        console.warn(`[AI] Disaster error details:`, error.stack);
                         disasterError = error;
                         // Continue to next model if this one fails
                         if (error.message?.includes("403") || error.message?.includes("leaked")) {
@@ -101,7 +117,15 @@ export default async function handler(req: any, res: any) {
 
                 for (const model of imageModels) {
                     try {
+                        console.log(`[AI] Attempting to get image model: ${model}`);
                         const modelInstance = ai.models.get(model);
+                        console.log(`[AI] Image model object retrieved:`, !!modelInstance);
+
+                        if (!modelInstance || typeof modelInstance.generateContent !== 'function') {
+                            console.warn(`[AI] Image model ${model} does not have generateContent function`);
+                            continue;
+                        }
+
                         imageResponse = await modelInstance.generateContent({
                             contents: [{ role: 'user', parts: [{ text: payload.prompt }] }]
                         });
@@ -109,6 +133,7 @@ export default async function handler(req: any, res: any) {
                         break;
                     } catch (error: any) {
                         console.warn(`[AI] Image generation with ${model} failed:`, error.message);
+                        console.warn(`[AI] Image error details:`, error.stack);
                         imageError = error;
                         // Continue to next model if this one fails
                         if (error.message?.includes("403") || error.message?.includes("leaked")) {

@@ -4,6 +4,15 @@
  */
 
 export const getApiKeys = () => {
+  console.log('Environment variables available:', {
+    VITE_GEMINI_API_KEY: !!import.meta.env.VITE_GEMINI_API_KEY,
+    VITE_FIRECRAWL_API_KEY: !!import.meta.env.VITE_FIRECRAWL_API_KEY,
+    VITE_PERPLEXITY_API_KEY: !!import.meta.env.VITE_PERPLEXITY_API_KEY,
+    VITE_NASA_API_KEY: !!import.meta.env.VITE_NASA_API_KEY,
+    VITE_OPENWEATHER_API_KEY: !!import.meta.env.VITE_OPENWEATHER_API_KEY,
+    VITE_MAPBOX_API_KEY: !!import.meta.env.VITE_MAPBOX_API_KEY,
+  });
+
   return {
     firecrawlKey: import.meta.env.VITE_FIRECRAWL_API_KEY || process.env.FIRECRAWL_API_KEY || '',
     perplexityKey: import.meta.env.VITE_PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY || '',

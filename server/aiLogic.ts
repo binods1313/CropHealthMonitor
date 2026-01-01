@@ -40,11 +40,28 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
     for (const modelName of modelsToTry) {
         try {
             console.log(`[AI] Checking model: ${modelName}...`);
+            console.log('Model name is valid:', typeof modelName === 'string' && modelName.length > 0);
+
             const hasImage = payload.base64Image && payload.base64Image.length > 100;
             const healthPrompt = `Expert Ag-AI analysis for a ${payload.farm.crop} farm in ${payload.farm.location}. Metrics: NDVI Avg ${payload.ndviStats.avg}, pH ${payload.soilData.ph}, N=${payload.soilData.nitrogen}. Return JSON.`;
 
+            // Defensive check for model name
+            if (!modelName || typeof modelName !== 'string') {
+                console.warn(`[AI] Invalid model name: ${modelName}`);
+                continue;
+            }
+
             // Try to use the generateContent method with the model
+            console.log(`[AI] Attempting to get model: ${modelName}`);
             const model = ai.models.get(modelName);
+            console.log(`[AI] Model object retrieved:`, !!model);
+
+            if (!model || typeof model.generateContent !== 'function') {
+                console.warn(`[AI] Model ${modelName} does not have generateContent function`);
+                continue;
+            }
+
+            console.log(`[AI] Calling generateContent for model: ${modelName}`);
             const response = await model.generateContent({
                 contents: [
                     {
@@ -61,8 +78,10 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
                 }
             });
 
+            console.log(`[AI] Response received for ${modelName}:`, !!response);
+
             // Handle different response structures
-            const text = response.response?.text() ||
+            const text = response.response?.text?.() ||
                 response.text ||
                 (response.candidates?.[0]?.content?.parts?.[0]?.text);
 
@@ -73,6 +92,7 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
         } catch (error: any) {
             lastError = error;
             console.warn(`[AI] ${modelName} failed:`, error.message);
+            console.warn(`[AI] Error details:`, error.stack);
 
             // If the error is 429 (quota exceeded), we skip to next model
             if (error.message?.includes("429") || error.message?.includes("quota")) continue;
