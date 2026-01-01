@@ -29,7 +29,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Initialize with the object pattern
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI(apiKey);
 
     try {
         let response: any;
@@ -53,25 +53,79 @@ export default async function handler(req: any, res: any) {
                     Return situation report in JSON.
                 `;
 
-                response = await ai.models.generateContent({
-                    model: "gemini-1.5-flash",
-                    contents: [{ role: 'user', parts: [{ text: riskPrompt }] }],
-                    config: {
-                        responseMimeType: "application/json",
-                        responseSchema: payload.schema,
+                // Try multiple models for disaster risk analysis
+                const disasterModels = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
+                let disasterResponse = null;
+                let disasterError = null;
+
+                for (const model of disasterModels) {
+                    try {
+                        const modelInstance = ai.models.get(model);
+                        disasterResponse = await modelInstance.generateContent({
+                            contents: [{ role: 'user', parts: [{ text: riskPrompt }] }],
+                            generationConfig: {
+                                responseMimeType: "application/json",
+                                responseSchema: payload.schema,
+                            }
+                        });
+                        console.log(`[AI] Disaster risk analysis SUCCESS with ${model}.`);
+                        break;
+                    } catch (error: any) {
+                        console.warn(`[AI] Disaster risk analysis with ${model} failed:`, error.message);
+                        disasterError = error;
+                        // Continue to next model if this one fails
+                        if (error.message?.includes("403") || error.message?.includes("leaked")) {
+                            // If it's a key issue, stop trying other models
+                            break;
+                        }
+                        continue;
                     }
-                });
-                return res.json(JSON.parse(response.text || '{}'));
+                }
+
+                if (!disasterResponse) {
+                    throw disasterError || new Error("All disaster risk analysis models failed");
+                }
+
+                return res.json(JSON.parse(disasterResponse.response?.text() || disasterResponse.text || '{}'));
 
             case 'generateImage':
-                response = await ai.models.generateContent({
-                    model: payload.model || 'gemini-1.5-flash',
-                    contents: [{ role: 'user', parts: [{ text: payload.prompt }] }]
-                });
+                // Try multiple models for image generation
+                const imageModels = [
+                    payload.model || "gemini-1.5-flash",
+                    "gemini-1.5-pro",
+                    "gemini-2.0-flash-exp",
+                    "gemini-pro-vision"
+                ];
+                let imageResponse = null;
+                let imageError = null;
+
+                for (const model of imageModels) {
+                    try {
+                        const modelInstance = ai.models.get(model);
+                        imageResponse = await modelInstance.generateContent({
+                            contents: [{ role: 'user', parts: [{ text: payload.prompt }] }]
+                        });
+                        console.log(`[AI] Image generation SUCCESS with ${model}.`);
+                        break;
+                    } catch (error: any) {
+                        console.warn(`[AI] Image generation with ${model} failed:`, error.message);
+                        imageError = error;
+                        // Continue to next model if this one fails
+                        if (error.message?.includes("403") || error.message?.includes("leaked")) {
+                            // If it's a key issue, stop trying other models
+                            break;
+                        }
+                        continue;
+                    }
+                }
+
+                if (!imageResponse) {
+                    throw imageError || new Error("All image generation models failed");
+                }
 
                 // Extract image data from parts
-                if (response.candidates?.[0]?.content?.parts) {
-                    const parts = response.candidates[0].content.parts;
+                if (imageResponse.response?.candidates?.[0]?.content?.parts) {
+                    const parts = imageResponse.response.candidates[0].content.parts;
                     for (const part of parts) {
                         if (part.inlineData && part.inlineData.data) {
                             return res.json({ data: part.inlineData.data });

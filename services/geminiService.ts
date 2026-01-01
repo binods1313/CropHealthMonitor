@@ -211,7 +211,7 @@ export const generateFarmLogo = async (farm: FarmData): Promise<string> => {
         action: 'generateImage',
         payload: {
           prompt: `Professional circular logo for "${farm.name}". Stylized "${farm.crop}" icon. Minimalist, modern agritech style.`,
-          model: 'gemini-2.5-flash-image'
+          model: 'gemini-1.5-flash'  // Changed to a more reliable model
         }
       })
     });
@@ -244,7 +244,7 @@ export const generateDisasterImpactMap = async (data: DisasterAnalysis): Promise
         payload: {
           prompt: `Tactical top-down GIS impact map for ${data.metadata.disasterType} in ${data.metadata.location.region}.
             Dark gray coordinate grid. Digital heatmap overlays (Red/Amber risk zones). Vector spread arrows. Technical command style.`,
-          model: 'gemini-2.5-flash-image'
+          model: 'gemini-1.5-flash'  // Changed to a more reliable model
         }
       })
     });

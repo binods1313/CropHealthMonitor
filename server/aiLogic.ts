@@ -27,13 +27,13 @@ export const REPORT_SCHEMA = {
 };
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
-    // Extensive list of models to try. gemini-2.0-flash is the newest and least likely to have quota issues.
+    // Updated list of models to try. Using more stable and available models.
     const modelsToTry = [
-        "gemini-2.0-flash",
         "gemini-1.5-flash",
         "gemini-1.5-pro",
         "gemini-2.0-flash-exp",
-        "gemini-1.5-flash-latest"
+        "gemini-1.5-flash-latest",
+        "gemini-pro-vision"
     ];
     let lastError: any;
 
@@ -43,8 +43,9 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
             const hasImage = payload.base64Image && payload.base64Image.length > 100;
             const healthPrompt = `Expert Ag-AI analysis for a ${payload.farm.crop} farm in ${payload.farm.location}. Metrics: NDVI Avg ${payload.ndviStats.avg}, pH ${payload.soilData.ph}, N=${payload.soilData.nitrogen}. Return JSON.`;
 
-            const response = await ai.models.generateContent({
-                model: modelName,
+            // Try to use the generateContent method with the model
+            const model = ai.models.get(modelName);
+            const response = await model.generateContent({
                 contents: [
                     {
                         role: 'user',
@@ -54,14 +55,15 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
                         ]
                     }
                 ],
-                config: {
+                generationConfig: {
                     responseMimeType: "application/json",
                     responseSchema: payload.schema || REPORT_SCHEMA
                 }
             });
 
             // Handle different response structures
-            const text = response.text ||
+            const text = response.response?.text() ||
+                response.text ||
                 (response.candidates?.[0]?.content?.parts?.[0]?.text);
 
             if (!text) throw new Error("Empty response");
@@ -72,13 +74,15 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
             lastError = error;
             console.warn(`[AI] ${modelName} failed:`, error.message);
 
-            // If the error is 429, we skip to next model
-            if (error.message?.includes("429")) continue;
-            // If the error is 404, we skip to next model
-            if (error.message?.includes("404")) continue;
+            // If the error is 429 (quota exceeded), we skip to next model
+            if (error.message?.includes("429") || error.message?.includes("quota")) continue;
+            // If the error is 404 (model not found) or 400 (bad request), we skip to next model
+            if (error.message?.includes("404") || error.message?.includes("400")) continue;
+            // If the error is related to model not being available, skip to next model
+            if (error.message?.includes("not found") || error.message?.includes("not available")) continue;
 
             // If the key is leaked (403), stop immediately
-            if (error.message?.includes("leaked")) break;
+            if (error.message?.includes("403") || error.message?.includes("leaked")) break;
         }
     }
 
