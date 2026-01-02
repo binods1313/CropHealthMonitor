@@ -27,12 +27,34 @@ export const REPORT_SCHEMA = {
 };
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
-    // Updated list of working models that are available and less likely to hit quotas
-    const modelsToTry = [
-        "gemini-1.5-flash-8b",  // Fast, efficient
-        "gemini-1.5-flash",     // Standard flash model
-        "gemini-1.5-pro",       // Pro model as backup
-    ];
+    // Get available models dynamically
+    let modelsToTry = [];
+    try {
+        const models = await ai.listModels();
+        console.log('[AI] Available models:', models.map((m: any) => m.name));
+        modelsToTry = models
+            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+            .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
+
+        if (modelsToTry.length === 0) {
+            console.log('[AI] No models found, using fallback models');
+            modelsToTry = [
+                "gemini-pro",           // Basic text model
+                "gemini-1.0-pro",       // Specific version
+                "gemini-1.5-flash",     // Standard flash model
+                "gemini-1.5-pro",       // Pro model as backup
+            ];
+        }
+    } catch (error) {
+        console.error('[AI] Failed to list models:', error);
+        // Fallback to known models if listing fails
+        modelsToTry = [
+            "gemini-pro",           // Basic text model
+            "gemini-1.0-pro",       // Specific version
+            "gemini-1.5-flash",     // Standard flash model
+            "gemini-1.5-pro",       // Pro model as backup
+        ];
+    }
     let lastError: any;
 
     for (const modelName of modelsToTry) {

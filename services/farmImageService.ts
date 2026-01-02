@@ -69,50 +69,111 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
       Ensure this looks like a SOFTWARE INTERFACE or TECHNICAL SCHEMATIC, completely distinct from the satellite photo.
     `;
 
-    // Generate the images sequentially to ensure they are distinct
-    const ndviModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
+    // Get available models dynamically
+    let modelsToTry = [];
+    try {
+        const models = await ai.listModels();
+        console.log('[FarmImageService] Available models:', models.map((m: any) => m.name));
+        modelsToTry = models
+            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+            .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
 
-    // Add retry logic with exponential backoff for quota limits
-    const maxRetries = 3;
-    let ndviResponse;
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        ndviResponse = await ndviModel.generateContent({
-          contents: { parts: [{ text: ndviPrompt }] }
-        });
-        break; // Success, exit retry loop
-      } catch (error: any) {
-        console.warn(`[FarmImageService] NDVI image generation attempt ${i+1} failed:`, error.message);
-        if (error.message?.includes("429") && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
-          console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
+        if (modelsToTry.length === 0) {
+            console.log('[FarmImageService] No models found, using fallback models');
+            modelsToTry = [
+                "gemini-pro",           // Basic text model
+                "gemini-1.0-pro",       // Specific version
+                "gemini-1.5-flash",     // Standard flash model
+                "gemini-1.5-pro",       // Pro model as backup
+            ];
         }
-        throw error; // Re-throw if it's not a quota error or max retries reached
-      }
+    } catch (error) {
+        console.error('[FarmImageService] Failed to list models:', error);
+        // Fallback to known models if listing fails
+        modelsToTry = [
+            "gemini-pro",           // Basic text model
+            "gemini-1.0-pro",       // Specific version
+            "gemini-1.5-flash",     // Standard flash model
+            "gemini-1.5-pro",       // Pro model as backup
+        ];
     }
 
-    const diagModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
+    // Generate the images sequentially to ensure they are distinct
+    let ndviResponse;
+    const maxRetries = 3;
 
-    // Add retry logic with exponential backoff for quota limits
-    let diagResponse;
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        diagResponse = await diagModel.generateContent({
-          contents: { parts: [{ text: diagnosticPrompt }] }
-        });
-        break; // Success, exit retry loop
-      } catch (error: any) {
-        console.warn(`[FarmImageService] Diagnostic image generation attempt ${i+1} failed:`, error.message);
-        if (error.message?.includes("429") && i < maxRetries - 1) {
-          const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
-          console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
+    // Find the first available model that works for NDVI generation
+    for (const modelName of modelsToTry) {
+        console.log(`[FarmImageService] Trying NDVI model: ${modelName}`);
+        const ndviModel = ai.getGenerativeModel({ model: modelName });
+
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                ndviResponse = await ndviModel.generateContent({
+                    contents: { parts: [{ text: ndviPrompt }] }
+                });
+                console.log(`[FarmImageService] NDVI image generation SUCCESS with ${modelName}`);
+                break; // Success, exit retry loop
+            } catch (error: any) {
+                console.warn(`[FarmImageService] NDVI image generation attempt ${i+1} with ${modelName} failed:`, error.message);
+                if (error.message?.includes("429") && i < maxRetries - 1) {
+                    const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                    console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                } else if (error.message?.includes("429") && i >= maxRetries - 1) {
+                    // If quota error persists after retries, try next model
+                    console.log(`[FarmImageService] Quota exceeded for ${modelName}, trying next model...`);
+                    continue;
+                }
+                // If it's not a quota error, try next model
+                console.log(`[FarmImageService] Non-quota error with ${modelName}, trying next model...`);
+                break;
+            }
         }
-        throw error; // Re-throw if it's not a quota error or max retries reached
-      }
+
+        // If we got a successful response, break out of model loop
+        if (ndviResponse) {
+            break;
+        }
+    }
+
+    let diagResponse;
+
+    // Find the first available model that works for diagnostic generation
+    for (const modelName of modelsToTry) {
+        console.log(`[FarmImageService] Trying diagnostic model: ${modelName}`);
+        const diagModel = ai.getGenerativeModel({ model: modelName });
+
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                diagResponse = await diagModel.generateContent({
+                    contents: { parts: [{ text: diagnosticPrompt }] }
+                });
+                console.log(`[FarmImageService] Diagnostic image generation SUCCESS with ${modelName}`);
+                break; // Success, exit retry loop
+            } catch (error: any) {
+                console.warn(`[FarmImageService] Diagnostic image generation attempt ${i+1} with ${modelName} failed:`, error.message);
+                if (error.message?.includes("429") && i < maxRetries - 1) {
+                    const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                    console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                } else if (error.message?.includes("429") && i >= maxRetries - 1) {
+                    // If quota error persists after retries, try next model
+                    console.log(`[FarmImageService] Quota exceeded for ${modelName}, trying next model...`);
+                    continue;
+                }
+                // If it's not a quota error, try next model
+                console.log(`[FarmImageService] Non-quota error with ${modelName}, trying next model...`);
+                break;
+            }
+        }
+
+        // If we got a successful response, break out of model loop
+        if (diagResponse) {
+            break;
+        }
     }
 
     const extractImage = (response: any) => {

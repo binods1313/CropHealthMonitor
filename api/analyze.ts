@@ -60,12 +60,34 @@ export default async function handler(req: any, res: any) {
                     Return situation report in JSON.
                 `;
 
-                // Updated list of working models that are available and less likely to hit quotas
-                const disasterModels = [
-                    "gemini-1.5-flash-8b",  // Fast, efficient
-                    "gemini-1.5-flash",     // Standard flash model
-                    "gemini-1.5-pro",       // Pro model as backup
-                ];
+                // Get available models dynamically
+                let disasterModels = [];
+                try {
+                    const models = await ai.listModels();
+                    console.log('[AI] Available disaster models:', models.map((m: any) => m.name));
+                    disasterModels = models
+                        .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+                        .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
+
+                    if (disasterModels.length === 0) {
+                        console.log('[AI] No disaster models found, using fallback models');
+                        disasterModels = [
+                            "gemini-pro",           // Basic text model
+                            "gemini-1.0-pro",       // Specific version
+                            "gemini-1.5-flash",     // Standard flash model
+                            "gemini-1.5-pro",       // Pro model as backup
+                        ];
+                    }
+                } catch (error) {
+                    console.error('[AI] Failed to list disaster models:', error);
+                    // Fallback to known models if listing fails
+                    disasterModels = [
+                        "gemini-pro",           // Basic text model
+                        "gemini-1.0-pro",       // Specific version
+                        "gemini-1.5-flash",     // Standard flash model
+                        "gemini-1.5-pro",       // Pro model as backup
+                    ];
+                }
                 let disasterResponse = null;
                 let disasterError = null;
 
@@ -127,12 +149,39 @@ export default async function handler(req: any, res: any) {
                 return res.json(JSON.parse(disasterResponse.response?.text() || (disasterResponse.text && typeof disasterResponse.text === 'function' ? disasterResponse.text() : disasterResponse.text) || '{}'));
 
             case 'generateImage':
-                // Updated list of working models that are available and less likely to hit quotas
-                const imageModels = [
-                    payload.model || "gemini-1.5-flash-8b",  // Fast, efficient
-                    "gemini-1.5-flash",                     // Standard flash model
-                    "gemini-1.5-pro",                       // Pro model as backup
-                ];
+                // Get available models dynamically for image generation
+                let imageModels = [];
+                try {
+                    const models = await ai.listModels();
+                    console.log('[AI] Available image models:', models.map((m: any) => m.name));
+                    imageModels = models
+                        .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+                        .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
+
+                    if (imageModels.length === 0) {
+                        console.log('[AI] No image models found, using fallback models');
+                        imageModels = [
+                            "gemini-pro",           // Basic text model
+                            "gemini-1.0-pro",       // Specific version
+                            "gemini-1.5-flash",     // Standard flash model
+                            "gemini-1.5-pro",       // Pro model as backup
+                        ];
+                    }
+
+                    // Add the payload model if provided and not already in the list
+                    if (payload.model && !imageModels.includes(payload.model)) {
+                        imageModels.unshift(payload.model);
+                    }
+                } catch (error) {
+                    console.error('[AI] Failed to list image models:', error);
+                    // Fallback to known models if listing fails
+                    imageModels = [
+                        payload.model || "gemini-pro",      // Basic text model
+                        "gemini-1.0-pro",                   // Specific version
+                        "gemini-1.5-flash",                 // Standard flash model
+                        "gemini-1.5-pro",                   // Pro model as backup
+                    ];
+                }
                 let imageResponse = null;
                 let imageError = null;
 
