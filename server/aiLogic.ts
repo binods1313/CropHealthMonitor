@@ -27,13 +27,58 @@ export const REPORT_SCHEMA = {
 };
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
-    // Use known working models since listModels() is not available on GoogleGenerativeAI instance
-    // Use most commonly available models that should work with most API keys
-    const modelsToTry = [
-        "gemini-1.5-flash",         // Most commonly available multimodal model
-        "gemini-1.5-pro",           // Pro version as backup
-        "gemini-pro",               // Basic text model (most universally available)
-    ];
+    // Create a temporary client to list available models using the direct API
+    const listModelsClient = {
+        async listModels(apiKey: string) {
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.models || [];
+            } catch (error) {
+                console.error('Error listing models:', error);
+                return [];
+            }
+        }
+    };
+
+    // Get the API key from the ai instance (this is a workaround since we don't have direct access)
+    // In a real scenario, you'd want to pass the API key separately
+    const apiKey = (ai as any).apiKey || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
+    // Get available models dynamically
+    let modelsToTry: string[] = [];
+    const allModels = await listModelsClient.listModels(apiKey);
+
+    // Filter for models that support the generateContent method
+    modelsToTry = allModels
+        .filter((model: any) =>
+            model &&
+            model.name &&
+            model.supportedGenerationMethods &&
+            model.supportedGenerationMethods.includes('generateContent') &&
+            // Only include models that are likely to be available for most users
+            (model.name.includes('gemini') && !model.name.includes('embedding'))
+        )
+        .map((model: any) => model.name.replace('models/', '')); // Remove 'models/' prefix
+
+    // If no models were found from the API, use fallback models
+    if (modelsToTry.length === 0) {
+        console.log('[AI] No models found from API, using fallback models');
+        modelsToTry = [
+            "gemini-1.5-flash",         // Most commonly available multimodal model
+            "gemini-1.5-pro",           // Pro version as backup
+            "gemini-pro",               // Basic text model (most universally available)
+        ];
+    }
+
+    console.log('[AI] Available farm health analysis models:', modelsToTry);
     let lastError: any;
 
     for (const modelName of modelsToTry) {

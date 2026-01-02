@@ -34,9 +34,30 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ error: "Missing 'action' or 'payload' in request body." });
     }
 
-    // Initialize with the object pattern
+    // Initialize with the API key
     console.log('Initializing GoogleGenerativeAI with API key:', apiKey ? 'yes' : 'no');
     const ai = new GoogleGenerativeAI(apiKey);
+
+    // Create a separate client for listing models using the direct API
+    const listModelsClient = {
+        async listModels() {
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.models || [];
+            } catch (error) {
+                console.error('Error listing models:', error);
+                return [];
+            }
+        }
+    };
 
     try {
         let response: any;
@@ -60,12 +81,33 @@ export default async function handler(req: any, res: any) {
                     Return situation report in JSON.
                 `;
 
-                // Use most commonly available models that should work with most API keys
-                const disasterModels = [
-                    "gemini-1.5-flash",         // Most commonly available multimodal model
-                    "gemini-1.5-pro",           // Pro version as backup
-                    "gemini-pro",               // Basic text model (most universally available)
-                ];
+                // Get available models dynamically using the direct API
+                let disasterModels = [];
+                const allModels = await listModelsClient.listModels();
+
+                // Filter for models that support the generateContent method
+                disasterModels = allModels
+                    .filter((model: any) =>
+                        model &&
+                        model.name &&
+                        model.supportedGenerationMethods &&
+                        model.supportedGenerationMethods.includes('generateContent') &&
+                        // Only include models that are likely to be available for most users
+                        (model.name.includes('gemini') && !model.name.includes('embedding'))
+                    )
+                    .map((model: any) => model.name.replace('models/', '')); // Remove 'models/' prefix
+
+                // If no models were found from the API, use fallback models
+                if (disasterModels.length === 0) {
+                    console.log('[AI] No models found from API, using fallback models');
+                    disasterModels = [
+                        "gemini-1.5-flash",         // Most commonly available multimodal model
+                        "gemini-1.5-pro",           // Pro version as backup
+                        "gemini-pro",               // Basic text model (most universally available)
+                    ];
+                }
+
+                console.log('[AI] Available disaster models:', disasterModels);
                 let disasterResponse = null;
                 let disasterError = null;
 
@@ -127,17 +169,38 @@ export default async function handler(req: any, res: any) {
                 return res.json(JSON.parse(disasterResponse.response?.text() || (disasterResponse.text && typeof disasterResponse.text === 'function' ? disasterResponse.text() : disasterResponse.text) || '{}'));
 
             case 'generateImage':
-                // Use most commonly available models that should work with most API keys
-                let imageModels = [
-                    "gemini-1.5-flash",         // Most commonly available multimodal model
-                    "gemini-1.5-pro",           // Pro version as backup
-                    "gemini-pro",               // Basic text model (most universally available)
-                ];
+                // Get available models dynamically for image generation using the direct API
+                let imageModels = [];
+                const allModels = await listModelsClient.listModels();
+
+                // Filter for models that support the generateContent method
+                imageModels = allModels
+                    .filter((model: any) =>
+                        model &&
+                        model.name &&
+                        model.supportedGenerationMethods &&
+                        model.supportedGenerationMethods.includes('generateContent') &&
+                        // Only include models that are likely to be available for most users
+                        (model.name.includes('gemini') && !model.name.includes('embedding'))
+                    )
+                    .map((model: any) => model.name.replace('models/', '')); // Remove 'models/' prefix
+
+                // If no models were found from the API, use fallback models
+                if (imageModels.length === 0) {
+                    console.log('[AI] No image models found from API, using fallback models');
+                    imageModels = [
+                        "gemini-1.5-flash",         // Most commonly available multimodal model
+                        "gemini-1.5-pro",           // Pro version as backup
+                        "gemini-pro",               // Basic text model (most universally available)
+                    ];
+                }
 
                 // Add the payload model if provided and not already in the list
                 if (payload.model && !imageModels.includes(payload.model)) {
                     imageModels.unshift(payload.model);
                 }
+
+                console.log('[AI] Available image models:', imageModels);
                 let imageResponse = null;
                 let imageError = null;
 
