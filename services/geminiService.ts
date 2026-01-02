@@ -1,32 +1,32 @@
 
-import { Type } from "@google/genai";
+import { SchemaType } from "@google/generative-ai";
 import { FarmData, HealthReport, NDVIStats, SoilData } from "../types";
 import { DisasterAnalysis, DISASTER_REPORT_SCHEMA } from "./DisasterReportEnhancement";
 import { fetchWithFallback } from '../utils/apiFallback';
 
 const REPORT_SCHEMA = {
-  type: Type.OBJECT,
+  type: SchemaType.OBJECT,
   properties: {
-    healthScore: { type: Type.NUMBER, description: "0 to 100 integer score of crop health" },
-    confidence: { type: Type.NUMBER, description: "AI confidence level 0 to 100" },
-    primaryDiagnosis: { type: Type.STRING, description: "The main identified issue" },
-    affectedArea: { type: Type.STRING, description: "Percentage or description of area affected" },
-    detailedExplanation: { type: Type.STRING, description: "Comprehensive agronomic reasoning" },
+    healthScore: { type: SchemaType.NUMBER, description: "0 to 100 integer score of crop health" },
+    confidence: { type: SchemaType.NUMBER, description: "AI confidence level 0 to 100" },
+    primaryDiagnosis: { type: SchemaType.STRING, description: "The main identified issue" },
+    affectedArea: { type: SchemaType.STRING, description: "Percentage or description of area affected" },
+    detailedExplanation: { type: SchemaType.STRING, description: "Comprehensive agronomic reasoning" },
     interventions: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          title: { type: Type.STRING },
-          goal: { type: Type.STRING },
-          impact: { type: Type.STRING },
-          confidence: { type: Type.NUMBER },
-          materials: { type: Type.ARRAY, items: { type: Type.STRING } }
+          title: { type: SchemaType.STRING },
+          goal: { type: SchemaType.STRING },
+          impact: { type: SchemaType.STRING },
+          confidence: { type: SchemaType.NUMBER },
+          materials: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
         },
         required: ["title", "goal", "impact", "confidence", "materials"]
       }
     },
-    monitoringPlan: { type: Type.STRING }
+    monitoringPlan: { type: SchemaType.STRING }
   },
   required: ["healthScore", "primaryDiagnosis", "affectedArea", "detailedExplanation", "interventions", "monitoringPlan"]
 };

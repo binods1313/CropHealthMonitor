@@ -1,28 +1,28 @@
 
-import { Type } from "@google/genai";
+import { SchemaType } from "@google/generative-ai";
 
 export const REPORT_SCHEMA = {
-    type: Type.OBJECT,
+    type: SchemaType.OBJECT,
     properties: {
-        healthScore: { type: Type.NUMBER },
-        confidence: { type: Type.NUMBER },
-        primaryDiagnosis: { type: Type.STRING },
-        affectedArea: { type: Type.STRING },
-        detailedExplanation: { type: Type.STRING },
+        healthScore: { type: SchemaType.NUMBER },
+        confidence: { type: SchemaType.NUMBER },
+        primaryDiagnosis: { type: SchemaType.STRING },
+        affectedArea: { type: SchemaType.STRING },
+        detailedExplanation: { type: SchemaType.STRING },
         interventions: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                    title: { type: Type.STRING },
-                    goal: { type: Type.STRING },
-                    impact: { type: Type.STRING },
-                    confidence: { type: Type.NUMBER },
-                    materials: { type: Type.ARRAY, items: { type: Type.STRING } }
+                    title: { type: SchemaType.STRING },
+                    goal: { type: SchemaType.STRING },
+                    impact: { type: SchemaType.STRING },
+                    confidence: { type: SchemaType.NUMBER },
+                    materials: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
                 }
             }
         },
-        monitoringPlan: { type: Type.STRING }
+        monitoringPlan: { type: SchemaType.STRING }
     }
 };
 
@@ -53,7 +53,7 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
 
             // Try to use the generateContent method with the model
             console.log(`[AI] Attempting to get model: ${modelName}`);
-            const model = ai.models.get(modelName);
+            const model = ai.getGenerativeModel({ model: modelName });
             console.log(`[AI] Model object retrieved:`, !!model);
 
             if (!model || typeof model.generateContent !== 'function') {

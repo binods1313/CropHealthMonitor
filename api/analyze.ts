@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { runAnalyzeFarmHealth, REPORT_SCHEMA } from '../server/aiLogic';
 
 export default async function handler(req: any, res: any) {
@@ -14,8 +14,8 @@ export default async function handler(req: any, res: any) {
     let apiKey = '';
 
     try {
-        // Try to get the API key from config
-        const configModule = require('../src/config');
+        // Try to get the API key from config - using dynamic import instead of require
+        const configModule = await import('../src/config');
         apiKey = configModule.getApiKey('geminiKey');
         console.log('API Key from config:', apiKey ? 'exists' : 'missing');
     } catch (error) {
@@ -35,8 +35,8 @@ export default async function handler(req: any, res: any) {
     }
 
     // Initialize with the object pattern
-    console.log('Initializing GoogleGenAI with API key:', apiKey ? 'yes' : 'no');
-    const ai = new GoogleGenAI(apiKey);
+    console.log('Initializing GoogleGenerativeAI with API key:', apiKey ? 'yes' : 'no');
+    const ai = new GoogleGenerativeAI(apiKey);
 
     try {
         let response: any;
@@ -68,7 +68,7 @@ export default async function handler(req: any, res: any) {
                 for (const model of disasterModels) {
                     try {
                         console.log(`[AI] Attempting to get disaster model: ${model}`);
-                        const modelInstance = ai.models.get(model);
+                        const modelInstance = ai.getGenerativeModel({ model: model });
                         console.log(`[AI] Disaster model object retrieved:`, !!modelInstance);
 
                         if (!modelInstance || typeof modelInstance.generateContent !== 'function') {
@@ -118,7 +118,7 @@ export default async function handler(req: any, res: any) {
                 for (const model of imageModels) {
                     try {
                         console.log(`[AI] Attempting to get image model: ${model}`);
-                        const modelInstance = ai.models.get(model);
+                        const modelInstance = ai.getGenerativeModel({ model: model });
                         console.log(`[AI] Image model object retrieved:`, !!modelInstance);
 
                         if (!modelInstance || typeof modelInstance.generateContent !== 'function') {
