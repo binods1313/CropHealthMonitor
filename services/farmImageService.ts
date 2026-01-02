@@ -69,34 +69,13 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
       Ensure this looks like a SOFTWARE INTERFACE or TECHNICAL SCHEMATIC, completely distinct from the satellite photo.
     `;
 
-    // Get available models dynamically
-    let modelsToTry = [];
-    try {
-        const models = await ai.listModels();
-        console.log('[FarmImageService] Available models:', models.map((m: any) => m.name));
-        modelsToTry = models
-            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
-            .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
-
-        if (modelsToTry.length === 0) {
-            console.log('[FarmImageService] No models found, using fallback models');
-            modelsToTry = [
-                "gemini-pro",           // Basic text model
-                "gemini-1.0-pro",       // Specific version
-                "gemini-1.5-flash",     // Standard flash model
-                "gemini-1.5-pro",       // Pro model as backup
-            ];
-        }
-    } catch (error) {
-        console.error('[FarmImageService] Failed to list models:', error);
-        // Fallback to known models if listing fails
-        modelsToTry = [
-            "gemini-pro",           // Basic text model
-            "gemini-1.0-pro",       // Specific version
-            "gemini-1.5-flash",     // Standard flash model
-            "gemini-1.5-pro",       // Pro model as backup
-        ];
-    }
+    // Use known working models since listModels() is not available on GoogleGenerativeAI instance
+    const modelsToTry = [
+        "gemini-1.5-flash-latest",  // Latest flash model for images
+        "gemini-1.5-pro-latest",    // Latest pro model as backup
+        "gemini-1.5-flash",         // Standard flash model
+        "gemini-1.5-pro",           // Standard pro model
+    ];
 
     // Generate the images sequentially to ensure they are distinct
     let ndviResponse;

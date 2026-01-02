@@ -27,34 +27,15 @@ export const REPORT_SCHEMA = {
 };
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
-    // Get available models dynamically
-    let modelsToTry = [];
-    try {
-        const models = await ai.listModels();
-        console.log('[AI] Available models:', models.map((m: any) => m.name));
-        modelsToTry = models
-            .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
-            .map((m: any) => m.name.replace('models/', '')); // Remove 'models/' prefix
-
-        if (modelsToTry.length === 0) {
-            console.log('[AI] No models found, using fallback models');
-            modelsToTry = [
-                "gemini-pro",           // Basic text model
-                "gemini-1.0-pro",       // Specific version
-                "gemini-1.5-flash",     // Standard flash model
-                "gemini-1.5-pro",       // Pro model as backup
-            ];
-        }
-    } catch (error) {
-        console.error('[AI] Failed to list models:', error);
-        // Fallback to known models if listing fails
-        modelsToTry = [
-            "gemini-pro",           // Basic text model
-            "gemini-1.0-pro",       // Specific version
-            "gemini-1.5-flash",     // Standard flash model
-            "gemini-1.5-pro",       // Pro model as backup
-        ];
-    }
+    // Use known working models since listModels() is not available on GoogleGenerativeAI instance
+    // Based on the logs, let's try the correct model names that are available
+    const modelsToTry = [
+        "gemini-1.5-flash-latest",  // Latest flash model
+        "gemini-1.5-pro-latest",    // Latest pro model
+        "gemini-1.5-flash",         // Standard flash model
+        "gemini-1.5-pro",           // Standard pro model
+        "gemini-pro",               // Basic text model
+    ];
     let lastError: any;
 
     for (const modelName of modelsToTry) {
