@@ -69,12 +69,11 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
       Ensure this looks like a SOFTWARE INTERFACE or TECHNICAL SCHEMATIC, completely distinct from the satellite photo.
     `;
 
-    // Use known working models since listModels() is not available on GoogleGenerativeAI instance
+    // Use most commonly available models that should work with most API keys
     const modelsToTry = [
-        "gemini-1.5-flash-latest",  // Latest flash model for images
-        "gemini-1.5-pro-latest",    // Latest pro model as backup
-        "gemini-1.5-flash",         // Standard flash model
-        "gemini-1.5-pro",           // Standard pro model
+        "gemini-1.5-flash",         // Most commonly available multimodal model for images
+        "gemini-1.5-pro",           // Pro version as backup
+        "gemini-pro",               // Basic text model (most universally available)
     ];
 
     // Generate the images sequentially to ensure they are distinct

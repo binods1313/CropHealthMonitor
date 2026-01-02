@@ -60,13 +60,11 @@ export default async function handler(req: any, res: any) {
                     Return situation report in JSON.
                 `;
 
-                // Use known working models since listModels() is not available on GoogleGenerativeAI instance
+                // Use most commonly available models that should work with most API keys
                 const disasterModels = [
-                    "gemini-1.5-flash-latest",  // Latest flash model
-                    "gemini-1.5-pro-latest",    // Latest pro model
-                    "gemini-1.5-flash",         // Standard flash model
-                    "gemini-1.5-pro",           // Standard pro model
-                    "gemini-pro",               // Basic text model
+                    "gemini-1.5-flash",         // Most commonly available multimodal model
+                    "gemini-1.5-pro",           // Pro version as backup
+                    "gemini-pro",               // Basic text model (most universally available)
                 ];
                 let disasterResponse = null;
                 let disasterError = null;
@@ -129,13 +127,11 @@ export default async function handler(req: any, res: any) {
                 return res.json(JSON.parse(disasterResponse.response?.text() || (disasterResponse.text && typeof disasterResponse.text === 'function' ? disasterResponse.text() : disasterResponse.text) || '{}'));
 
             case 'generateImage':
-                // Use known working models since listModels() is not available on GoogleGenerativeAI instance
+                // Use most commonly available models that should work with most API keys
                 let imageModels = [
-                    "gemini-1.5-flash-latest",  // Latest flash model
-                    "gemini-1.5-pro-latest",    // Latest pro model
-                    "gemini-1.5-flash",         // Standard flash model
-                    "gemini-1.5-pro",           // Standard pro model
-                    "gemini-pro",               // Basic text model
+                    "gemini-1.5-flash",         // Most commonly available multimodal model
+                    "gemini-1.5-pro",           // Pro version as backup
+                    "gemini-pro",               // Basic text model (most universally available)
                 ];
 
                 // Add the payload model if provided and not already in the list

@@ -28,13 +28,11 @@ export const REPORT_SCHEMA = {
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
     // Use known working models since listModels() is not available on GoogleGenerativeAI instance
-    // Based on the logs, let's try the correct model names that are available
+    // Use most commonly available models that should work with most API keys
     const modelsToTry = [
-        "gemini-1.5-flash-latest",  // Latest flash model
-        "gemini-1.5-pro-latest",    // Latest pro model
-        "gemini-1.5-flash",         // Standard flash model
-        "gemini-1.5-pro",           // Standard pro model
-        "gemini-pro",               // Basic text model
+        "gemini-1.5-flash",         // Most commonly available multimodal model
+        "gemini-1.5-pro",           // Pro version as backup
+        "gemini-pro",               // Basic text model (most universally available)
     ];
     let lastError: any;
 
