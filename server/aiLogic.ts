@@ -80,10 +80,9 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
 
             console.log(`[AI] Response received for ${modelName}:`, !!response);
 
-            // Handle different response structures
-            const text = response.response?.text?.() ||
-                response.text ||
-                (response.candidates?.[0]?.content?.parts?.[0]?.text);
+            // Handle different response structures for the new package
+            const text = response.response?.text() ||
+                (response.text && typeof response.text === 'function' ? response.text() : response.text);
 
             if (!text) throw new Error("Empty response");
 

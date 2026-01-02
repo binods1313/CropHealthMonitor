@@ -102,7 +102,7 @@ export default async function handler(req: any, res: any) {
                     throw disasterError || new Error("All disaster risk analysis models failed");
                 }
 
-                return res.json(JSON.parse(disasterResponse.response?.text() || disasterResponse.text || '{}'));
+                return res.json(JSON.parse(disasterResponse.response?.text() || (disasterResponse.text && typeof disasterResponse.text === 'function' ? disasterResponse.text() : disasterResponse.text) || '{}'));
 
             case 'generateImage':
                 // Try multiple models for image generation
@@ -155,6 +155,15 @@ export default async function handler(req: any, res: any) {
                         if (part.inlineData && part.inlineData.data) {
                             return res.json({ data: part.inlineData.data });
                         }
+                    }
+                } else if (imageResponse.response?.text) {
+                    // Alternative way to extract image data for the new package
+                    const responseText = typeof imageResponse.response.text === 'function'
+                        ? imageResponse.response.text()
+                        : imageResponse.response.text;
+                    const dataMatch = responseText.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+                    if (dataMatch) {
+                        return res.json({ data: dataMatch[1] });
                     }
                 }
                 throw new Error("No image data returned from Gemini API");
