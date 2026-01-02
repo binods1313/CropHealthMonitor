@@ -70,15 +70,50 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
     `;
 
     // Generate the images sequentially to ensure they are distinct
-    const ndviModel = ai.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
-    const ndviResponse = await ndviModel.generateContent({
-      contents: { parts: [{ text: ndviPrompt }] }
-    });
+    const ndviModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
 
-    const diagModel = ai.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
-    const diagResponse = await diagModel.generateContent({
-      contents: { parts: [{ text: diagnosticPrompt }] }
-    });
+    // Add retry logic with exponential backoff for quota limits
+    const maxRetries = 3;
+    let ndviResponse;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        ndviResponse = await ndviModel.generateContent({
+          contents: { parts: [{ text: ndviPrompt }] }
+        });
+        break; // Success, exit retry loop
+      } catch (error: any) {
+        console.warn(`[FarmImageService] NDVI image generation attempt ${i+1} failed:`, error.message);
+        if (error.message?.includes("429") && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+          console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error; // Re-throw if it's not a quota error or max retries reached
+      }
+    }
+
+    const diagModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
+
+    // Add retry logic with exponential backoff for quota limits
+    let diagResponse;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        diagResponse = await diagModel.generateContent({
+          contents: { parts: [{ text: diagnosticPrompt }] }
+        });
+        break; // Success, exit retry loop
+      } catch (error: any) {
+        console.warn(`[FarmImageService] Diagnostic image generation attempt ${i+1} failed:`, error.message);
+        if (error.message?.includes("429") && i < maxRetries - 1) {
+          const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+          console.log(`[FarmImageService] Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw error; // Re-throw if it's not a quota error or max retries reached
+      }
+    }
 
     const extractImage = (response: any) => {
       if (response.candidates?.[0]?.content?.parts) {

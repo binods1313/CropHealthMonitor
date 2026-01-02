@@ -60,8 +60,12 @@ export default async function handler(req: any, res: any) {
                     Return situation report in JSON.
                 `;
 
-                // Try multiple models for disaster risk analysis
-                const disasterModels = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
+                // Updated list of working models that are available and less likely to hit quotas
+                const disasterModels = [
+                    "gemini-1.5-flash-8b",  // Fast, efficient
+                    "gemini-1.5-flash",     // Standard flash model
+                    "gemini-1.5-pro",       // Pro model as backup
+                ];
                 let disasterResponse = null;
                 let disasterError = null;
 
@@ -76,13 +80,31 @@ export default async function handler(req: any, res: any) {
                             continue;
                         }
 
-                        disasterResponse = await modelInstance.generateContent({
-                            contents: [{ role: 'user', parts: [{ text: riskPrompt }] }],
-                            generationConfig: {
-                                responseMimeType: "application/json",
-                                responseSchema: payload.schema,
+                        // Add retry logic with exponential backoff for quota limits
+                        const maxRetries = 3;
+                        for (let i = 0; i < maxRetries; i++) {
+                            try {
+                                console.log(`[AI] Calling generateContent for disaster model: ${model} (attempt ${i+1})`);
+                                disasterResponse = await modelInstance.generateContent({
+                                    contents: [{ role: 'user', parts: [{ text: riskPrompt }] }],
+                                    generationConfig: {
+                                        responseMimeType: "application/json",
+                                        responseSchema: payload.schema,
+                                    }
+                                });
+                                break; // Success, exit retry loop
+                            } catch (error: any) {
+                                console.warn(`[AI] Disaster analysis attempt ${i+1} failed for ${model}:`, error.message);
+                                if (error.message?.includes("429") && i < maxRetries - 1) {
+                                    const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                                    console.log(`[AI] Waiting ${delay}ms before retry...`);
+                                    await new Promise(resolve => setTimeout(resolve, delay));
+                                    continue;
+                                }
+                                throw error; // Re-throw if it's not a quota error or max retries reached
                             }
-                        });
+                        }
+
                         console.log(`[AI] Disaster risk analysis SUCCESS with ${model}.`);
                         break;
                     } catch (error: any) {
@@ -105,12 +127,11 @@ export default async function handler(req: any, res: any) {
                 return res.json(JSON.parse(disasterResponse.response?.text() || (disasterResponse.text && typeof disasterResponse.text === 'function' ? disasterResponse.text() : disasterResponse.text) || '{}'));
 
             case 'generateImage':
-                // Try multiple models for image generation
+                // Updated list of working models that are available and less likely to hit quotas
                 const imageModels = [
-                    payload.model || "gemini-1.5-flash",
-                    "gemini-1.5-pro",
-                    "gemini-2.0-flash-exp",
-                    "gemini-pro-vision"
+                    payload.model || "gemini-1.5-flash-8b",  // Fast, efficient
+                    "gemini-1.5-flash",                     // Standard flash model
+                    "gemini-1.5-pro",                       // Pro model as backup
                 ];
                 let imageResponse = null;
                 let imageError = null;
@@ -126,9 +147,27 @@ export default async function handler(req: any, res: any) {
                             continue;
                         }
 
-                        imageResponse = await modelInstance.generateContent({
-                            contents: [{ role: 'user', parts: [{ text: payload.prompt }] }]
-                        });
+                        // Add retry logic with exponential backoff for quota limits
+                        const maxRetries = 3;
+                        for (let i = 0; i < maxRetries; i++) {
+                            try {
+                                console.log(`[AI] Calling generateContent for image model: ${model} (attempt ${i+1})`);
+                                imageResponse = await modelInstance.generateContent({
+                                    contents: [{ role: 'user', parts: [{ text: payload.prompt }] }]
+                                });
+                                break; // Success, exit retry loop
+                            } catch (error: any) {
+                                console.warn(`[AI] Image generation attempt ${i+1} failed for ${model}:`, error.message);
+                                if (error.message?.includes("429") && i < maxRetries - 1) {
+                                    const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                                    console.log(`[AI] Waiting ${delay}ms before retry...`);
+                                    await new Promise(resolve => setTimeout(resolve, delay));
+                                    continue;
+                                }
+                                throw error; // Re-throw if it's not a quota error or max retries reached
+                            }
+                        }
+
                         console.log(`[AI] Image generation SUCCESS with ${model}.`);
                         break;
                     } catch (error: any) {

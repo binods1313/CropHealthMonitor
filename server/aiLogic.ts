@@ -27,13 +27,11 @@ export const REPORT_SCHEMA = {
 };
 
 export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
-    // Updated list of models to try. Using more stable and available models.
+    // Updated list of working models that are available and less likely to hit quotas
     const modelsToTry = [
-        "gemini-1.5-flash",
-        "gemini-1.5-pro",
-        "gemini-2.0-flash-exp",
-        "gemini-1.5-flash-latest",
-        "gemini-pro-vision"
+        "gemini-1.5-flash-8b",  // Fast, efficient
+        "gemini-1.5-flash",     // Standard flash model
+        "gemini-1.5-pro",       // Pro model as backup
     ];
     let lastError: any;
 
@@ -61,22 +59,39 @@ export const runAnalyzeFarmHealth = async (ai: any, payload: any) => {
                 continue;
             }
 
-            console.log(`[AI] Calling generateContent for model: ${modelName}`);
-            const response = await model.generateContent({
-                contents: [
-                    {
-                        role: 'user',
-                        parts: [
-                            { text: healthPrompt },
-                            ...(hasImage ? [{ inlineData: { mimeType: "image/jpeg", data: payload.base64Image } }] : [])
-                        ]
+            // Add retry logic with exponential backoff for quota limits
+            let response;
+            const maxRetries = 3;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    console.log(`[AI] Calling generateContent for model: ${modelName} (attempt ${i+1})`);
+                    response = await model.generateContent({
+                        contents: [
+                            {
+                                role: 'user',
+                                parts: [
+                                    { text: healthPrompt },
+                                    ...(hasImage ? [{ inlineData: { mimeType: "image/jpeg", data: payload.base64Image } }] : [])
+                                ]
+                            }
+                        ],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: payload.schema || REPORT_SCHEMA
+                        }
+                    });
+                    break; // Success, exit retry loop
+                } catch (error: any) {
+                    console.warn(`[AI] Attempt ${i+1} failed for ${modelName}:`, error.message);
+                    if (error.message?.includes("429") && i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                        console.log(`[AI] Waiting ${delay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
                     }
-                ],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: payload.schema || REPORT_SCHEMA
+                    throw error; // Re-throw if it's not a quota error or max retries reached
                 }
-            });
+            }
 
             console.log(`[AI] Response received for ${modelName}:`, !!response);
 
