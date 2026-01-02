@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { FarmData } from "../types";
 import { fetchWithFallback } from '../utils/apiFallback';
 
@@ -16,7 +16,7 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
       throw new Error("Gemini API key is missing");
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenerativeAI(apiKey);
 
     // Prompt 1: Realistic Sentinel-2 NDVI (Observational Data)
     const ndviPrompt = `
@@ -70,13 +70,13 @@ export const generateDualFarmImages = async (farm: FarmData): Promise<{ ndviMap:
     `;
 
     // Generate the images sequentially to ensure they are distinct
-    const ndviResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+    const ndviModel = ai.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
+    const ndviResponse = await ndviModel.generateContent({
       contents: { parts: [{ text: ndviPrompt }] }
     });
 
-    const diagResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+    const diagModel = ai.getGenerativeModel({ model: 'gemini-2.5-flash-image' });
+    const diagResponse = await diagModel.generateContent({
       contents: { parts: [{ text: diagnosticPrompt }] }
     });
 
