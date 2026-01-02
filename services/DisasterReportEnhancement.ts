@@ -1,5 +1,5 @@
 
-import { Type } from "@google/genai";
+import { SchemaType } from "@google/generative-ai";
 
 // --- Data Types ---
 
@@ -131,185 +131,185 @@ export interface DisasterAnalysis {
 // --- Gemini Schema Definition ---
 
 export const DISASTER_REPORT_SCHEMA = {
-  type: Type.OBJECT,
+  type: SchemaType.OBJECT,
   properties: {
     metadata: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
-        eventId: { type: Type.STRING },
-        disasterType: { type: Type.STRING },
-        severity: { type: Type.NUMBER },
-        detectionTime: { type: Type.STRING },
+        eventId: { type: SchemaType.STRING },
+        disasterType: { type: SchemaType.STRING },
+        severity: { type: SchemaType.NUMBER },
+        detectionTime: { type: SchemaType.STRING },
         location: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            region: { type: Type.STRING },
-            country: { type: Type.STRING },
-            coordinates: { type: Type.OBJECT, properties: { lat: { type: Type.NUMBER }, lon: { type: Type.NUMBER } } },
-            affectedAreaSqKm: { type: Type.NUMBER }
+            region: { type: SchemaType.STRING },
+            country: { type: SchemaType.STRING },
+            coordinates: { type: SchemaType.OBJECT, properties: { lat: { type: SchemaType.NUMBER }, lon: { type: SchemaType.NUMBER } } },
+            affectedAreaSqKm: { type: SchemaType.NUMBER }
           }
         },
         satelliteImagery: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            provider: { type: Type.STRING },
-            date: { type: Type.STRING },
-            resolution: { type: Type.STRING }
+            provider: { type: SchemaType.STRING },
+            date: { type: SchemaType.STRING },
+            resolution: { type: SchemaType.STRING }
           }
         }
       }
     },
     riskAssessment: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         immediateRisk: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            severity: { type: Type.NUMBER },
-            description: { type: Type.STRING },
-            timeToImpact: { type: Type.STRING },
-            populationAtRisk: { type: Type.NUMBER }
+            severity: { type: SchemaType.NUMBER },
+            description: { type: SchemaType.STRING },
+            timeToImpact: { type: SchemaType.STRING },
+            populationAtRisk: { type: SchemaType.NUMBER }
           }
         },
         trajectoryPrediction: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            predictedPath: { type: Type.STRING },
-            windInfluence: { type: Type.STRING },
-            spreadRate: { type: Type.STRING },
-            confidence: { type: Type.NUMBER }
+            predictedPath: { type: SchemaType.STRING },
+            windInfluence: { type: SchemaType.STRING },
+            spreadRate: { type: SchemaType.STRING },
+            confidence: { type: SchemaType.NUMBER }
           }
         },
         environmentalFactors: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            temperature: { type: Type.NUMBER },
-            humidity: { type: Type.NUMBER },
-            windSpeed: { type: Type.NUMBER },
-            windDirection: { type: Type.STRING },
-            precipitation: { type: Type.NUMBER }
+            temperature: { type: SchemaType.NUMBER },
+            humidity: { type: SchemaType.NUMBER },
+            windSpeed: { type: SchemaType.NUMBER },
+            windDirection: { type: SchemaType.STRING },
+            precipitation: { type: SchemaType.NUMBER }
           }
         }
       }
     },
     interventionStrategy: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         immediateActions: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              priority: { type: Type.NUMBER },
-              action: { type: Type.STRING },
-              goal: { type: Type.STRING },
-              impact: { type: Type.STRING },
-              timing: { type: Type.STRING },
-              responsibleAgency: { type: Type.STRING },
-              resources: { type: Type.ARRAY, items: { type: Type.STRING } },
-              costLevel: { type: Type.STRING, enum: ["Low", "Medium", "High"] },
-              expectedOutcome: { type: Type.STRING }
+              priority: { type: SchemaType.NUMBER },
+              action: { type: SchemaType.STRING },
+              goal: { type: SchemaType.STRING },
+              impact: { type: SchemaType.STRING },
+              timing: { type: SchemaType.STRING },
+              responsibleAgency: { type: SchemaType.STRING },
+              resources: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              costLevel: { type: SchemaType.STRING, enum: ["Low", "Medium", "High"] },
+              expectedOutcome: { type: SchemaType.STRING }
             }
           }
         },
         evacuationPlan: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
             zones: {
-              type: Type.ARRAY,
+              type: SchemaType.ARRAY,
               items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  zoneId: { type: Type.STRING },
-                  name: { type: Type.STRING },
-                  population: { type: Type.NUMBER },
-                  evacuationRoute: { type: Type.STRING },
-                  timeToEvacuate: { type: Type.STRING }
+                  zoneId: { type: SchemaType.STRING },
+                  name: { type: SchemaType.STRING },
+                  population: { type: SchemaType.NUMBER },
+                  evacuationRoute: { type: SchemaType.STRING },
+                  timeToEvacuate: { type: SchemaType.STRING }
                 }
               }
             },
-            shelterLocations: { type: Type.ARRAY, items: { type: Type.STRING } }
+            shelterLocations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
           }
         },
         resourceAllocation: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            firefighting: { type: Type.STRING },
-            medical: { type: Type.STRING },
-            emergency: { type: Type.STRING }
+            firefighting: { type: SchemaType.STRING },
+            medical: { type: SchemaType.STRING },
+            emergency: { type: SchemaType.STRING }
           }
         }
       }
     },
     monitoringPlan: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         timelinePhases: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              phase: { type: Type.STRING },
-              actions: { type: Type.ARRAY, items: { type: Type.STRING } },
-              checkpoints: { type: Type.ARRAY, items: { type: Type.STRING } }
+              phase: { type: SchemaType.STRING },
+              actions: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+              checkpoints: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
             }
           }
         },
         liveMonitoringPoints: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              location: { type: Type.STRING },
-              metric: { type: Type.STRING },
-              alertThreshold: { type: Type.STRING }
+              location: { type: SchemaType.STRING },
+              metric: { type: SchemaType.STRING },
+              alertThreshold: { type: SchemaType.STRING }
             }
           }
         }
       }
     },
     communicationStrategy: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         publicAlerts: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            channels: { type: Type.ARRAY, items: { type: Type.STRING } },
-            messageFrequency: { type: Type.STRING },
-            keyMessages: { type: Type.ARRAY, items: { type: Type.STRING } }
+            channels: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+            messageFrequency: { type: SchemaType.STRING },
+            keyMessages: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
           }
         },
         officialUpdates: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            authority: { type: Type.STRING },
-            updateFrequency: { type: Type.STRING }
+            authority: { type: SchemaType.STRING },
+            updateFrequency: { type: SchemaType.STRING }
           }
         }
       }
     },
     historicalContext: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         previousSimilarEvents: {
-          type: Type.ARRAY,
+          type: SchemaType.ARRAY,
           items: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              event: { type: Type.STRING },
-              year: { type: Type.STRING },
-              impact: { type: Type.STRING }
+              event: { type: SchemaType.STRING },
+              year: { type: SchemaType.STRING },
+              impact: { type: SchemaType.STRING }
             }
           }
         },
-        regionalRiskProfile: { type: Type.STRING }
+        regionalRiskProfile: { type: SchemaType.STRING }
       }
     },
     meta: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
-        overallConfidenceScore: { type: Type.NUMBER },
-        disclaimer: { type: Type.STRING }
+        overallConfidenceScore: { type: SchemaType.NUMBER },
+        disclaimer: { type: SchemaType.STRING }
       }
     }
   }
